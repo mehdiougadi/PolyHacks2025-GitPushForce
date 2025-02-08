@@ -10,9 +10,15 @@ export default function Home() {
                 <Text style={styles.cardTitle}>Inventory Management</Text>
                 <Text style={styles.cardText}>Track seeds, tools, and supplies</Text>
             </Link>
-        </View>
-    );
+
+            <Link href="/advisor" style={styles.card}>
+                <Text style={styles.cardTitle}>Ask the Farm Advisor</Text>
+                <Text style={styles.cardText}>Get farming advice with our chatbot</Text>
+            </Link>
+    </View>
+  );
 }
+
 
 const styles = StyleSheet.create({
     container: {

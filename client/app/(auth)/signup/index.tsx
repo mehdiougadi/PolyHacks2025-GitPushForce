@@ -52,7 +52,14 @@ export default function SignUpScreen() {
                 return;
             }
             await signUp(formData);
-            
+            setFormData({
+                username: '',
+                email: '',
+                firstName: '',
+                lastName: '',
+                password: '',
+                profilePicture: ''
+            });
         } catch (error) {
             showMessage("An error occurred during sign up. Please try again.", "Error");
         }
@@ -135,6 +142,11 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: "#FFF",
         maxWidth: 500,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
     },
     button: {
         backgroundColor: '#2b9348',

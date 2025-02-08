@@ -4,17 +4,65 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@client/contexts/auth-context";
 import LoadingScreen from "@client/components/screens/loading-screen";
 import AuthScreen from "@client/components/screens/auth-screen";
+import { useMessage } from "@client/contexts/message-context";
 
 export default function SigninScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const {signIn, isLoading} = useAuth();
+    const { showMessage } = useMessage();
 
     useEffect(() => {}, [isLoading]);
 
     if(isLoading){
         return <LoadingScreen />
     }
+
+    const validateSignIn = () => {
+        const errors: string[] = [];
+
+        if (!email.trim()) {
+            errors.push('Email is required');
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.push('Please enter a valid email address');
+        }
+
+        if (!password.trim()) {
+            errors.push('Password is required');
+        }
+
+        return errors;
+    };
+
+    const handleSignIn = async () => {
+        try {
+            const errors = validateSignIn();
+            if (errors.length > 0) {
+                showMessage(errors, "Validation Error");
+                return;
+            }
+
+            await signIn(email, password);
+            setEmail('');
+            setPassword('');
+        } catch (error: any) {
+            let errorMessage = "An error occurred during sign in. Please try again.";
+            
+            if (error.code === 'auth/user-not-found') {
+                errorMessage = "No account exists with this email address";
+            } else if (error.code === 'auth/wrong-password') {
+                errorMessage = "Incorrect password";
+            } else if (error.code === 'auth/invalid-email') {
+                errorMessage = "Invalid email address";
+            } else if (error.code === 'auth/too-many-requests') {
+                errorMessage = "Too many failed attempts. Please try again later";
+            } else if (error.code === 'auth/invalid-credential') {
+                errorMessage = "Invalid Password";
+            }
+
+            showMessage(errorMessage, "Sign In Error");
+        }
+    };
 
     return (
         <AuthScreen>
@@ -41,7 +89,7 @@ export default function SigninScreen() {
                     />
                     <TouchableOpacity 
                         style={styles.button}
-                        onPress={() => {signIn(email, password)}}
+                        onPress={() => {handleSignIn()}}
                     >
                         <Text style={styles.buttonText}>Sign In</Text>
                     </TouchableOpacity>
@@ -78,6 +126,11 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         backgroundColor: "#FFF",
         maxWidth: 500,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
     },
     button: {
         backgroundColor: '#2b9348',

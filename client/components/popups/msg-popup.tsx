@@ -22,24 +22,28 @@ export default function MessagePopUp({
         >
             <View style={styles.overlay}>
                 <View style={styles.container}>
-                    <Text style={styles.title}>{title}</Text>
+                    <View style={styles.header}>
+                        <Text style={styles.title}>{title}</Text>
+                    </View>
                     <View style={styles.messageContainer}>
                         {Array.isArray(message) ? (
                             message.map((msg, index) => (
                                 <Text key={index} style={styles.message}>
-                                    {msg}
+                                    • {msg}
                                 </Text>
                             ))
                         ) : (
                             <Text style={styles.message}>{message}</Text>
                         )}
                     </View>
-                    <TouchableOpacity 
-                        style={styles.button} 
-                        onPress={onClose}
-                    >
-                        <Text style={styles.buttonText}>OK</Text>
-                    </TouchableOpacity>
+                    <View style={styles.footer}>
+                        <TouchableOpacity 
+                            style={styles.button}
+                            onPress={onClose}
+                        >
+                            <Text style={styles.buttonText}>OK</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         </Modal>
@@ -49,49 +53,66 @@ export default function MessagePopUp({
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         justifyContent: 'center',
         alignItems: 'center',
+        padding: 20,
     },
     container: {
         backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 20,
-        width: '90%',
+        borderRadius: 16,
+        width: '100%',
         maxWidth: 400,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+        overflow: 'hidden',
+    },
+    header: {
+        width: '100%',
+        padding: 20,
+        paddingBottom: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#e5e5e5',
     },
     title: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 12,
-        textAlign: 'center',
+        color: '#1a1a1a',
+        textAlign: 'left',
     },
     messageContainer: {
-        marginBottom: 20,
+        padding: 20,
+        paddingTop: 15,
+        paddingBottom: 15,
     },
     message: {
         fontSize: 16,
+        lineHeight: 24,
+        color: '#333',
+        textAlign: 'left',
         marginBottom: 8,
-        textAlign: 'center',
-        lineHeight: 22,
+    },
+    footer: {
+        padding: 20,
+        paddingTop: 15,
+        borderTopWidth: 1,
+        borderTopColor: '#e5e5e5',
+        alignItems: 'flex-end',
     },
     button: {
         backgroundColor: '#2b9348',
-        paddingVertical: 12,
-        paddingHorizontal: 24,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
         borderRadius: 8,
-        alignSelf: 'center',
-        minWidth: 100,
+        minWidth: 80,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 3,
     },
     buttonText: {
         color: 'white',

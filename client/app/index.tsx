@@ -8,5 +8,5 @@ export default function RootIndex() {
         return null;
     }
 
-    return isAuthenticated ? <Redirect href="/(app)/home/index" /> : <Redirect href="/(auth)/entry/index" />;
+    return isAuthenticated ? <Redirect href="/(app)/home" /> : <Redirect href="/(auth)/entry" />;
 }

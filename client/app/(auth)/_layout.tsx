@@ -7,9 +7,9 @@ export default function AuthLayout(){
     return (
         <View>
             <Tabs>
-                <Tabs.Screen name="(auth)/entry" />
-                <Tabs.Screen name="(auth)/signin" />
-                <Tabs.Screen name="(auth)/signup" />
+                <Tabs.Screen name="entry" />
+                <Tabs.Screen name="signin" />
+                <Tabs.Screen name="signup" />
             </Tabs>
         </View>
     );

@@ -1,3 +1,3 @@
-import InventoryScreen from '../../../components/screens/inventory-screen';
+import InventoryCategoriesScreen from '../../../components/screens/inventory-categories-screen';
 
-export default InventoryScreen;
+export default InventoryCategoriesScreen;

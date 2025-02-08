@@ -1,56 +1,26 @@
-import { View, Text, StyleSheet } from "react-native";
-import { Link } from "expo-router";
+import { View, StyleSheet } from "react-native";
 import DefaultScreen from "@client/components/screens/default-screen";
+import features from "@client/constants/features";
+import FeatureItem from "@client/components/items/feature-item";
 
 export default function Home() {
     return (
         <DefaultScreen>
-            <Text style={styles.title}>Farm Assistant Dashboard</Text>
-            
-            <Link href="/inventory" style={styles.card}>
-                <Text style={styles.cardTitle}>Inventory Management</Text>
-                <Text style={styles.cardText}>Track seeds, tools, and supplies</Text>
-            </Link>
-
-            <Link href="/advisor" style={styles.card}>
-                <Text style={styles.cardTitle}>Ask the Farm Advisor</Text>
-                <Text style={styles.cardText}>Get farming advice with our chatbot</Text>
-            </Link>
-    </DefaultScreen>
-  );
+            <View style={styles.container}>
+                {features.map((feature) => (
+                    <FeatureItem key={feature.route} feature={feature} />
+                ))}
+            </View>
+        </DefaultScreen>
+    );
 }
-
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        padding: 16,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-        color: '#2c3e50',
-    },
-    card: {
-        backgroundColor: 'white',
+        flexDirection: "row",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        gap: 16,
         padding: 20,
-        borderRadius: 10,
-        marginBottom: 15,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 2,
-    },
-    cardTitle: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#27ae60',
-        marginBottom: 8,
-    },
-    cardText: {
-        fontSize: 14,
-        color: '#7f8c8d',
     },
 });

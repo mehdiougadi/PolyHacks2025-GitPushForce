@@ -1,8 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import DefaultScreen from './default-screen';
 
 const AdvisorScreen = () => {
   return (
+    <DefaultScreen>
     <View style={styles.container}>
       <Text style={styles.title}>Farm Advisor Chatbot</Text>
       
@@ -15,6 +17,7 @@ const AdvisorScreen = () => {
         Once the chatbot is integrated, you will be able to ask farming-related questions here.
       </Text>
     </View>
+    </DefaultScreen>
   );
 };
 

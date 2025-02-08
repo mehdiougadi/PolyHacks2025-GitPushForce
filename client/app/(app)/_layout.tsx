@@ -13,6 +13,10 @@ export default function AppLayout() {
         name="inventory/index" 
         options={{ title: "Inventory Management" }} 
       />
+      <Tabs.Screen 
+        name="advisor/index" 
+        options={{ title: "Farm Advisor" }} 
+      />
     </Tabs>
   );
 }

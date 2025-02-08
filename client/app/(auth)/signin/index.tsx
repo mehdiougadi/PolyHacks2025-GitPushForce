@@ -1,11 +1,20 @@
 import AuthInput from "@client/components/inputs/input-auth";
 import DefaultScreen from "@client/components/screens/default-screen";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@client/contexts/auth-context";
+import LoadingScreen from "@client/components/screens/loading-screen";
 
 export default function SigninScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const {signIn, isLoading} = useAuth();
+
+    useEffect(() => {}, [isLoading]);
+
+    if(isLoading){
+        return <LoadingScreen />
+    }
 
     return (
         <DefaultScreen>
@@ -30,7 +39,7 @@ export default function SigninScreen() {
                     />
                     <TouchableOpacity 
                         style={styles.button}
-                        onPress={() => {}}
+                        onPress={() => {signIn(email, password)}}
                     >
                         <Text style={styles.buttonText}>Sign In</Text>
                     </TouchableOpacity>

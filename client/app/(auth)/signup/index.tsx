@@ -1,7 +1,9 @@
 import AuthInput from "@client/components/inputs/input-auth";
 import DefaultScreen from "@client/components/screens/default-screen";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useAuth } from "@client/contexts/auth-context";
+import LoadingScreen from "@client/components/screens/loading-screen";
 
 export default function SignUpScreen() {
     const [formData, setFormData] = useState({
@@ -19,6 +21,13 @@ export default function SignUpScreen() {
             [field]: value
         }));
     };
+    const { signUp, isLoading } = useAuth();
+
+    useEffect(() => {}, [isLoading]);
+
+    if(isLoading){
+        <LoadingScreen />
+    }
 
     return (
         <DefaultScreen>
@@ -58,7 +67,7 @@ export default function SignUpScreen() {
                     />
                     <TouchableOpacity 
                         style={styles.button}
-                        onPress={() => {}}
+                        onPress={() => {signUp(formData)}}
                     >
                         <Text style={styles.buttonText}>Sign Up</Text>
                     </TouchableOpacity>

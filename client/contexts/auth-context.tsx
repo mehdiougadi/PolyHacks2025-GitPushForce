@@ -1,18 +1,29 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { auth } from '@client/firebase';
+import { doc, setDoc, getDoc } from "firebase/firestore";
+import { auth, db } from "@client/firebase"; 
 import UserSignUp from '@common/interfaces/user-signup';
 import User from '@common/interfaces/user';
+import {
+    EmailAuthProvider,
+    createUserWithEmailAndPassword,
+    updateProfile,
+    getAuth,
+    reauthenticateWithCredential,
+    signInWithEmailAndPassword,
+    signOut as firebaseSignOut,
+} from 'firebase/auth';
 
 interface AuthContextProps {
     children: ReactNode;
 }
 
 interface AuthContextType {
+    user: User | null; // Added missing user property
     token: string | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    signIn: (username: string, password: string) => Promise<void>;
+    signIn: (email: string, password: string) => Promise<void>;
     signUp: (userData: UserSignUp) => Promise<void>;
     signOut: () => Promise<void>;
     getToken: () => string | null;
@@ -54,17 +65,14 @@ function AuthContextProvider({ children }: AuthContextProps) {
         navigate();
     }, [isAuthenticated, isLoading]);
 
-    // Getters
     const getToken = () => {
         return token;
     };
 
-    // Setters
     const updateUser = (updatedUser: User) => {
         setUser(updatedUser);
     };
 
-    // Methods
     const checkAuthStatus = async () => {
         try {
             setIsLoading(true);
@@ -72,31 +80,108 @@ function AuthContextProvider({ children }: AuthContextProps) {
 
             if (currentUser) {
                 const token = await currentUser.getIdToken();
-                // const userData = await authService.getUserDetails(currentUser.uid, token);
+                const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data() as User;
+                    setUser(userData);
+                }
+                
                 setToken(token);
-                // setUser(userData);
                 setIsAuthenticated(true);
             } else {
                 setIsAuthenticated(false);
             }
         } catch (error) {
             console.log("Error", error);
+            setIsAuthenticated(false);
         } finally {
             setIsLoading(false);
         }
     };
 
     const signUp = async (userData: UserSignUp) => {
+        try {
+            setIsLoading(true);
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                userData.email,
+                userData.password
+            );
+    
+            if (userCredential.user) {
+                await updateProfile(userCredential.user, {
+                    displayName: `${userData.firstName} ${userData.lastName}`,
+                    photoURL: userData.profilePicture || null
+                });
+    
+                const token = await userCredential.user.getIdToken();
+                const newUser: User = {
+                    uid: userCredential.user.uid,
+                    email: userData.email,
+                    username: userData.username,
+                    firstName: userData.firstName,
+                    lastName: userData.lastName,
+                    profilePicture: userData.profilePicture
+                };
+                await setDoc(doc(db, "users", newUser.uid), newUser);
+
+                setToken(token);
+                setUser(newUser);
+                setIsAuthenticated(true);
+            }
+        } catch (error) {
+            console.error('Sign up error:', error);
+            throw error;
+        } finally {
+            setIsLoading(false);
+        }
     };
-
-    const signIn = async (username: string, password: string) => {
-
+    
+    const signIn = async (email: string, password: string) => {
+        try {
+            setIsLoading(true);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    
+            if (userCredential.user) {
+                const token = await userCredential.user.getIdToken();
+                const userDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+    
+                if (!userDoc.exists()) {
+                    throw new Error("User data not found in Firestore");
+                }
+    
+                const userData = userDoc.data() as User;
+    
+                setToken(token);
+                setUser(userData);
+                setIsAuthenticated(true);
+            }
+        } catch (error) {
+            console.error('Sign in error:', error);
+            throw error;
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const signOut = async () => {
+        try {
+            setIsLoading(true);
+            await firebaseSignOut(auth);
+            setToken(null);
+            setUser(null);
+            setIsAuthenticated(false);
+            await router.replace('/(auth)/entry');
+        } catch (error) {
+            console.error('Sign out error:', error);
+            throw error;
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    const value = {
+    const value: AuthContextType = {
         user,
         token,
         isAuthenticated,
@@ -110,7 +195,6 @@ function AuthContextProvider({ children }: AuthContextProps) {
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
 
 export default function AuthProvider({ children }: AuthContextProps) {
     return (

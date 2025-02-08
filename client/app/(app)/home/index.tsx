@@ -11,9 +11,15 @@ export default function Home() {
                 <Text style={styles.cardTitle}>Inventory Management</Text>
                 <Text style={styles.cardText}>Track seeds, tools, and supplies</Text>
             </Link>
-        </DefaultScreen>
-    );
+
+            <Link href="/advisor" style={styles.card}>
+                <Text style={styles.cardTitle}>Ask the Farm Advisor</Text>
+                <Text style={styles.cardText}>Get farming advice with our chatbot</Text>
+            </Link>
+    </DefaultScreen>
+  );
 }
+
 
 const styles = StyleSheet.create({
     container: {

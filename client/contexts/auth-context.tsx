@@ -70,15 +70,18 @@ function AuthContextProvider({ children }: AuthContextProps) {
             setIsLoading(true);
             const currentUser = auth.currentUser;
 
-            if (currentUser) {
-                const token = await currentUser.getIdToken();
-                // const userData = await authService.getUserDetails(currentUser.uid, token);
-                setToken(token);
-                // setUser(userData);
-                setIsAuthenticated(true);
-            } else {
-                setIsAuthenticated(false);
-            }
+            setIsAuthenticated(true);
+            return;
+
+            // if (currentUser) {
+            //     const token = await currentUser.getIdToken();
+            //     // const userData = await authService.getUserDetails(currentUser.uid, token);
+            //     setToken(token);
+            //     // setUser(userData);
+            //     setIsAuthenticated(true);
+            // } else {
+            //     setIsAuthenticated(false);
+            // }
         } catch (error) {
             console.log("Error", error);
         } finally {

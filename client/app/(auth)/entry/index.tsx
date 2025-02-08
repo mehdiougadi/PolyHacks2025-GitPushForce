@@ -7,7 +7,7 @@ export default function EntryScreen(){
     const router = useRouter();
     return (
         <View style={styles.container}>
-            {/* <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" /> */}
+            <StatusBar backgroundColor="transparent" translucent barStyle="dark-content" />
             <View style={styles.contentContainer}>
                 <Image source={require('@client/assets/images/logo.png')} style={{ height: 300, width: 300}}/>
                 <TouchableOpacity style={styles.button} onPress={() => {router.navigate('/(auth)/signin')}}>

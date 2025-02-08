@@ -1,9 +1,11 @@
 import AuthInput from "@client/components/inputs/input-auth";
-import DefaultScreen from "@client/components/screens/default-screen";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
 import { useAuth } from "@client/contexts/auth-context";
 import LoadingScreen from "@client/components/screens/loading-screen";
+import AuthScreen from "@client/components/screens/auth-screen";
+import { useMessage } from "@client/contexts/message-context";
+import verificationService from "@client/services/user-verification";
 
 export default function SignUpScreen() {
     const [formData, setFormData] = useState({
@@ -22,6 +24,7 @@ export default function SignUpScreen() {
         }));
     };
     const { signUp, isLoading } = useAuth();
+    const { showMessage } = useMessage();
 
     useEffect(() => {}, [isLoading]);
 
@@ -29,16 +32,44 @@ export default function SignUpScreen() {
         <LoadingScreen />
     }
 
+    const handleSignUp = async () => {
+        try {
+            const errors = verificationService.validateSignup(formData);
+            if (errors.length > 0) {
+                showMessage(errors, "Validation Error");
+                return;
+            }
+            const [isUsernameTaken, isEmailTaken] = await Promise.all([
+                verificationService.isUsernameTaken(formData.username),
+                verificationService.isEmailTaken(formData.email)
+            ]);
+
+            if (isUsernameTaken || isEmailTaken) {
+                const takenErrors = [];
+                if (isUsernameTaken) takenErrors.push("Username is already taken");
+                if (isEmailTaken) takenErrors.push("Email is already in use");
+                showMessage(takenErrors, "Account Error");
+                return;
+            }
+            await signUp(formData);
+            
+        } catch (error) {
+            showMessage("An error occurred during sign up. Please try again.", "Error");
+        }
+    };
+
     return (
-        <DefaultScreen>
+        <AuthScreen>
             <View style={styles.content}>
                 <Image 
                     source={require('@client/assets/images/logo.png')} 
                     style={{ height: 300, width: 300 }}
                     resizeMode="contain"
                 />
-                <Text style={styles.title}>Sign Up</Text>
                 <View style={styles.form}>
+                    <View style={{width: '100%'}}>
+                        <Text style={styles.title}>Sign Up</Text>
+                    </View>
                     <AuthInput 
                         placeholder="Username"
                         onChangeText={(value) => updateField('username', value)}
@@ -67,13 +98,13 @@ export default function SignUpScreen() {
                     />
                     <TouchableOpacity 
                         style={styles.button}
-                        onPress={() => {signUp(formData)}}
+                        onPress={() => {handleSignUp()}}
                     >
                         <Text style={styles.buttonText}>Sign Up</Text>
                     </TouchableOpacity>
                 </View>
             </View>
-        </DefaultScreen>
+        </AuthScreen>
     );
 }
 
@@ -87,21 +118,23 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        marginBottom: 20,
-        textAlign: 'center',
+        marginBottom: 8,
+        textAlign: 'left',
         fontFamily: 'System',
+        alignSelf: 'flex-start',
+        width: '100%',
     },
     form: {
         display: "flex",
-        width: "70%",
+        width: "80%",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
         padding: 16,
         gap: 16,
         borderRadius: 12,
-        backgroundColor: "#84e296",
-        maxWidth: 600,
+        backgroundColor: "#FFF",
+        maxWidth: 500,
     },
     button: {
         backgroundColor: '#2b9348',
@@ -109,6 +142,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         borderRadius: 8,
         width: '100%',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4,
+        elevation: 5,
     },
     buttonText: {
         color: 'white',

@@ -13,6 +13,7 @@ import {
     signInWithEmailAndPassword,
     signOut as firebaseSignOut,
 } from 'firebase/auth';
+import { MessageProvider } from './message-context';
 
 interface AuthContextProps {
     children: ReactNode;
@@ -199,7 +200,9 @@ function AuthContextProvider({ children }: AuthContextProps) {
 export default function AuthProvider({ children }: AuthContextProps) {
     return (
         <AuthContextProvider>
-            {children}
+            <MessageProvider>
+                {children}
+            </MessageProvider>
         </AuthContextProvider>
     );
 }

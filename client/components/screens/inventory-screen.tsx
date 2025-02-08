@@ -2,7 +2,7 @@ import { View, Text, FlatList, Button } from 'react-native';
 import { Stack } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import { Colors } from '../../constants/Colors';
-import DefaultScreen from "@client/components/screens/default-screen";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface InventoryCategory {
   id: string;
@@ -20,18 +20,20 @@ export default function InventoryScreen() {
   ];
 
   const renderItem = ({ item }: { item: InventoryCategory }) => (
-    <DefaultScreen>
+    <View style={styles.item}>
       <Text style={styles.title}>{item.name}</Text>
       <Text style={styles.count}>Quantity: {item.count}</Text>
       <View style={styles.buttonContainer}>
         <Button title="Edit" color={Colors.light.tint} />
         <Button title="Delete" color="#dc3545" />
       </View>
-    </DefaultScreen>
+    </View>
   );
 
   return (
-    <View style={styles.container}>
+    
+    <SafeAreaView style={styles.container}>
+    <View >
       <Stack.Screen options={{ title: 'Farm Inventory' }} />
       <Button title="Add New Item" color={Colors.light.tint} />
       <FlatList
@@ -41,6 +43,7 @@ export default function InventoryScreen() {
         contentContainerStyle={styles.list}
       />
     </View>
+    </SafeAreaView>
   );
 }
 

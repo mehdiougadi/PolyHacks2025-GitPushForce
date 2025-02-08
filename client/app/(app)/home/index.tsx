@@ -1,16 +1,17 @@
 import { View, Text, StyleSheet } from "react-native";
 import { Link } from "expo-router";
+import DefaultScreen from "@client/components/screens/default-screen";
 
 export default function Home() {
     return (
-        <View style={styles.container}>
+        <DefaultScreen>
             <Text style={styles.title}>Farm Assistant Dashboard</Text>
             
             <Link href="/inventory" style={styles.card}>
                 <Text style={styles.cardTitle}>Inventory Management</Text>
                 <Text style={styles.cardText}>Track seeds, tools, and supplies</Text>
             </Link>
-        </View>
+        </DefaultScreen>
     );
 }
 

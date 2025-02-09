@@ -1,4 +1,4 @@
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, Pressable, StyleSheet } from 'react-native';
 import { Colors } from "@client/constants/Colors";
 import { useColorScheme } from 'react-native';
 
@@ -27,37 +27,47 @@ export default function PlantHealthReport({ result, onRetake }: PlantHealthRepor
   const diseases = result?.health_assessment?.diseases || [];
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>Health Report</Text>
+    <View style={[styles.container]}>
+      <Text style={styles.title}>Health Report</Text>
       
-      {diseases.length > 0 ? (
-        diseases.map((disease, index) => (
-          <View 
-            key={index} 
-            style={[styles.diseaseContainer, { backgroundColor: colors.lightBackground }]}
-          >
-            <Text style={[styles.diseaseName, { color: colors.text }]}>
-              {disease.name}
-            </Text>
-            <Text style={[styles.probability, { color: colors.tint }]}>
-              Probability: {(disease.probability * 100).toFixed(1)}%
-            </Text>
-            <Text style={[styles.description, { color: colors.textSecondary }]}>
-              {disease.disease_description}
-            </Text>
-          </View>
-        ))
-      ) : (
-        <Text style={[styles.noDataText, { color: colors.text }]}>
-          No health records available.
-        </Text>
-      )}
-      
-      <Button 
-        title="Retake Photo" 
+      <ScrollView 
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={true}
+      >
+        {diseases.length > 0 ? (
+          diseases.map((disease, index) => (
+            <View
+              key={index}
+              style={styles.diseaseContainer}
+            >
+              <Text style={styles.diseaseName}>
+                {disease.name}
+              </Text>
+              <Text style={styles.probability}>
+                Probability: {(disease.probability * 100).toFixed(1)}%
+              </Text>
+              <Text style={styles.description}>
+                {disease.disease_description}
+              </Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.noDataText}>
+            No health records available.
+          </Text>
+        )}
+      </ScrollView>
+
+      <Pressable
         onPress={onRetake}
-        color={colors.tint}
-      />
+        style={({ pressed }) => [
+          styles.retakeButton,
+          pressed && styles.retakeButtonPressed
+        ]}
+      >
+        <Text style={styles.retakeButtonText}>Retake Photo</Text>
+      </Pressable>
     </View>
   );
 }
@@ -66,35 +76,90 @@ const styles = StyleSheet.create({
   container: {
     position: 'absolute',
     bottom: 0,
-    padding: 16,
     width: '100%',
+    height: '50%',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: -2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    backgroundColor: '#FFFFFF',
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginVertical: 16,
+    paddingHorizontal: 16,
+    color: '#000000',
+  },
+  scrollContainer: {
+    flex: 1,
+    marginBottom: 80, // Space for the button
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
   },
   diseaseContainer: {
     marginVertical: 8,
     padding: 12,
     borderRadius: 8,
+    backgroundColor: '#F5F5F5',
   },
   diseaseName: {
+    fontSize: 16,
     fontWeight: '600',
+    color: '#000000',
   },
   probability: {
     marginTop: 4,
+    fontSize: 14,
+    color: '#000000',
   },
   description: {
     fontSize: 14,
     marginTop: 4,
+    lineHeight: 20,
+    color: '#333333',
   },
   noDataText: {
     fontSize: 16,
     fontStyle: 'italic',
     marginBottom: 12,
+    color: '#000000',
+  },
+  retakeButton: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    right: 16,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    backgroundColor: '#F5F5F5',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  retakeButtonPressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.98 }],
+  },
+  retakeButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

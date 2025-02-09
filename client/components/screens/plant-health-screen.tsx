@@ -53,6 +53,7 @@ export default function PlantHealthScreen() {
       }
       
       const data = await apiResponse.json();
+      console.log("Full API response:", JSON.stringify(data, null, 2));
   
       // Manual validation of the response structure
       if (
@@ -61,8 +62,9 @@ export default function PlantHealthScreen() {
         !data.health_assessment ||
         !Array.isArray(data.health_assessment.diseases)
       ) {
+        console.error('Unexpected API response format:', data);
         throw new Error('Unexpected API response format');
-      }
+      }      
       
       setResult(data);
     } catch (error) {

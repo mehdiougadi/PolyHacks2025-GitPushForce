@@ -141,7 +141,7 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
               ),
               datasets: [{
                 data: filteredData2.map((d) => d.value),
-                color: () => 'green',
+                color: () => 'blue',
                 strokeWidth: 2,
               }],
             }}
@@ -150,7 +150,7 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
             chartConfig={{
               backgroundGradientFrom: '#f8f8f8',
               backgroundGradientTo: '#f8f8f8',
-              color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
+              color: (opacity = 1) => `rgba(30, 144, 255, ${opacity})`,
               labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
               propsForDots: {
                 r: '4',

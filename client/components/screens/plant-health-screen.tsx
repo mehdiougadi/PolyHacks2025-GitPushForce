@@ -1,4 +1,4 @@
-import { Camera, CameraType } from 'expo-camera';
+import { Camera } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
 import { Button, View, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import { PLANT_ID_API_KEY } from "@client/constants/api-key";
@@ -85,7 +85,7 @@ export default function PlantHealthScreen() {
         <Camera 
           style={styles.camera} 
           ref={cameraRef}
-          type={CameraType.back}
+          type={Camera.Constants.Type}
         />
       )}
       

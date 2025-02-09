@@ -19,6 +19,12 @@ export default function AppLayout() {
       <Tabs.Screen 
         name="weather/index" 
       />
+            <Tabs.Screen 
+        name="profile/index" 
+      />
+            <Tabs.Screen 
+        name="todo/index" 
+      />
     </Tabs>
   );
 }

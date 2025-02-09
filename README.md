@@ -50,3 +50,12 @@ For inquiries, suggestions, or collaboration, feel free to reach out to us at Me
 
 🌱 *FarmerFlow – Revolutionizing Agriculture with AI*
 
+## Preview
+
+Check out the app in action:
+
+![](./docs/p1.gif)
+![](./docs/p2.gif)
+![](./docs/p3.gif)
+![](./docs/p4.gif)
+

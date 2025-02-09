@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Button, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import Item from '@common/interfaces/item';
 import { useSegments, Link, useLocalSearchParams } from "expo-router";
@@ -131,19 +131,17 @@ export default function UserItemsScreen() {
             showsVerticalScrollIndicator={false}
           />
         )}
-        <View style={styles.bottomButton}>
-          <Button
-            title="Add New Item"
-            onPress={handleAddItem}
-            color="#121212"
-          />
+        <View>
+          <TouchableOpacity onPress={handleAddItem}style={styles.bottomButton}>
+            <Text style={{color: '#000', fontSize: 16}}>Add New Item</Text>
+          </TouchableOpacity>
         </View>
         <InventoryModal
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           onSave={handleSaveItem}
           editItem={editingItem}
-          category={category}
+          category={category as string}
         />
       </View>
     </SafeAreaView>
@@ -195,18 +193,21 @@ const styles = StyleSheet.create({
   },
   bottomButton: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 16,
+    left: 16,  
+    right: 16,
     padding: 16,
     backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
+    alignItems: 'center', 
+    justifyContent: 'center', 
   },
   emptyState: {
     flex: 1,

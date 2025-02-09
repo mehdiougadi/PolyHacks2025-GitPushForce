@@ -35,7 +35,7 @@ export default function PlantHealthScreen() {
       const formData = new FormData();
       formData.append('images', {
         uri,
-        type: 'image/jpeg',  // or 'image/png'
+        type: 'image/jpeg',
         name: 'plant_photo.jpg',
       } as any);
   
@@ -51,22 +51,36 @@ export default function PlantHealthScreen() {
       if (!apiResponse.ok) {
         throw new Error(`HTTP error! status: ${apiResponse.status}`);
       }
-      
+  
       const data = await apiResponse.json();
       console.log("Full API response:", JSON.stringify(data, null, 2));
   
-      // Manual validation of the response structure
+      // Check for the expected structure in the API response.
+      // The API returns disease suggestions under data.result.disease.suggestions
       if (
-        !data ||
-        typeof data !== 'object' ||
-        !data.health_assessment ||
-        !Array.isArray(data.health_assessment.diseases)
+        data &&
+        data.result &&
+        data.result.disease &&
+        Array.isArray(data.result.disease.suggestions)
       ) {
+        // Transform the API response into the expected format.
+        const transformedData = {
+          health_assessment: {
+            diseases: data.result.disease.suggestions.map((suggestion: any) => ({
+              // Map API fields to your expected fields.
+              // Adjust these keys if your API returns differently.
+              name: suggestion.name || 'Unknown Disease',
+              probability: suggestion.probability || 0,
+              disease_description: suggestion.disease_description || 'No description provided.',
+            })),
+          },
+        };
+  
+        setResult(transformedData);
+      } else {
         console.error('Unexpected API response format:', data);
         throw new Error('Unexpected API response format');
-      }      
-      
-      setResult(data);
+      }
     } catch (error) {
       console.error('Analysis error:', error);
     } finally {

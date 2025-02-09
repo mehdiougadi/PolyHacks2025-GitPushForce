@@ -31,23 +31,56 @@ export default function PlantHealthScreen() {
   const analyzePhoto = async (uri: string) => {
     setLoading(true);
     try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      
+      // Create form data with proper file structure
       const formData = new FormData();
-      formData.append('images', blob as any);
-      formData.append('key', PLANT_ID_API_KEY);
-
+      formData.append('images', {
+        uri,
+        type: 'image/jpeg',
+        name: 'plant_photo.jpg',
+      } as any);
+  
       const apiResponse = await fetch('https://plant.id/api/v3/health_assessment', {
         method: 'POST',
         body: formData,
         headers: {
           'Content-Type': 'multipart/form-data',
+          'Api-Key': PLANT_ID_API_KEY,
         },
       });
-
+  
+      if (!apiResponse.ok) {
+        throw new Error(`HTTP error! status: ${apiResponse.status}`);
+      }
+  
       const data = await apiResponse.json();
-      setResult(data);
+      console.log("Full API response:", JSON.stringify(data, null, 2));
+  
+      // Check for the expected structure in the API response.
+      // The API returns disease suggestions under data.result.disease.suggestions
+      if (
+        data &&
+        data.result &&
+        data.result.disease &&
+        Array.isArray(data.result.disease.suggestions)
+      ) {
+        // Transform the API response into the expected format.
+        const transformedData = {
+          health_assessment: {
+            diseases: data.result.disease.suggestions.map((suggestion: any) => ({
+              // Map API fields to your expected fields.
+              // Adjust these keys if your API returns differently.
+              name: suggestion.name || 'Unknown Disease',
+              probability: suggestion.probability || 0,
+              disease_description: suggestion.disease_description || '',
+            })),
+          },
+        };
+  
+        setResult(transformedData);
+      } else {
+        console.error('Unexpected API response format:', data);
+        throw new Error('Unexpected API response format');
+      }
     } catch (error) {
       console.error('Analysis error:', error);
     } finally {

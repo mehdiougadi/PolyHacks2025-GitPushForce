@@ -204,24 +204,40 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
           <Text style={styles.statLabel}>Average</Text>
           <Text style={styles.statValue}>
             {displayType === 'price' ? '$' : ''}
-            {(
-              filteredData.reduce((sum, item) => sum + item.value, 0) /
-              filteredData.length
-            ).toFixed(2)}
+            {filteredData.length > 0
+              ? (filteredData.reduce((sum, item) => sum + item.value, 0) / filteredData.length).toFixed(2)
+              : 'N/A'}
             {displayType === 'quantity' ? ' units' : ''}
           </Text>
         </View>
+
+        <View style={styles.statBox}>
+          <Text style={styles.statLabel}>
+            {displayType === 'price' ? 'Lowest Price' : 'Min Quantity'}
+          </Text>
+          <Text style={styles.statValue}>
+            {displayType === 'price' ? '$' : ''}
+            {filteredData.length > 0
+              ? Math.min(...filteredData.map(item => item.value)).toFixed(2)
+              : 'N/A'}
+            {displayType === 'quantity' ? ' units' : ''}
+          </Text>
+        </View>
+
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>
             {displayType === 'price' ? 'Highest Price' : 'Max Quantity'}
           </Text>
           <Text style={styles.statValue}>
             {displayType === 'price' ? '$' : ''}
-            {Math.max(...filteredData.map((item) => item.value)).toFixed(2)}
+            {filteredData.length > 0
+              ? Math.max(...filteredData.map(item => item.value)).toFixed(2)
+              : 'N/A'}
             {displayType === 'quantity' ? ' units' : ''}
           </Text>
         </View>
       </View>
+
     </SafeAreaView>
   );
 };

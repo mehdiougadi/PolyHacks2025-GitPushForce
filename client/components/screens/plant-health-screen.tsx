@@ -71,7 +71,7 @@ export default function PlantHealthScreen() {
               // Adjust these keys if your API returns differently.
               name: suggestion.name || 'Unknown Disease',
               probability: suggestion.probability || 0,
-              disease_description: suggestion.disease_description || 'No description provided.',
+              disease_description: suggestion.disease_description || '',
             })),
           },
         };

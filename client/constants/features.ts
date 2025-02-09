@@ -13,7 +13,7 @@ const features: Feature[] = [
     },
     {
         name: "Weather",
-        icon: require("@client/assets/icons/features/weither-logo.png"),
+        icon: require("@client/assets/icons/features/weather-logo.png"),
         route: "/(app)/weather",
     },
     

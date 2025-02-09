@@ -1,4 +1,4 @@
-import { Camera } from 'expo-camera';
+import { Camera, CameraType } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
 import { Button, View, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import { PLANT_ID_API_KEY } from "@client/constants/api-key";
@@ -6,14 +6,12 @@ import PlantHealthReport from "@client/components/plant-health-report";
 import { Colors } from "@client/constants/Colors";
 import { useColorScheme } from 'react-native';
 
-type CameraType = InstanceType<typeof Camera>;
-
 export default function PlantHealthScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
   const [photo, setPhoto] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const cameraRef = useRef<CameraType>(null);
+  const cameraRef = useRef<Camera>(null);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 

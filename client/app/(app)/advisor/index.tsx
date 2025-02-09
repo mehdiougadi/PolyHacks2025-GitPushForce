@@ -3,6 +3,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '@client/constants/Colors';
+import React from 'react';
+import ChatBot from '@client/components/chatbot/ChatBot';
 
 export default function AdvisorScreen(){
     const router = useRouter();
@@ -19,7 +21,7 @@ export default function AdvisorScreen(){
                 </Pressable>
                 <Text style={styles.headerTitle}>Home</Text>
             </View>
-            <Text>Advisor Screen</Text>
+            <ChatBot />
         </DefaultScreen>
     );
 }

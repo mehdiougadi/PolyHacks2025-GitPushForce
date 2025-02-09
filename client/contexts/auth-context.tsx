@@ -55,7 +55,6 @@ function AuthContextProvider({ children }: AuthContextProps) {
             unsubscribe = onSnapshot(userRef, (doc) => {
                 if (doc.exists()) {
                     const userData = doc.data() as User;
-                    console.log("User data updated:");
                     setUser(userData);
                 }
             }, (error) => {

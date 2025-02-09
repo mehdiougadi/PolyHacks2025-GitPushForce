@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView,useWindowDimensions,Platform } from 'react-native';
-import { VictoryChart, VictoryLine, VictoryAxis, VictoryTheme, VictoryTooltip, VictoryVoronoiContainer } from 'victory-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  Pressable, 
+  SafeAreaView, 
+  useWindowDimensions, 
+  Platform 
+} from 'react-native';
+import { 
+  VictoryChart, 
+  VictoryLine, 
+  VictoryAxis, 
+  VictoryTheme, 
+  VictoryTooltip, 
+  VictoryVoronoiContainer 
+} from 'victory-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
-
-const { width } = useWindowDimensions();
-
-const chartWidth = width - 32;
 
 interface DataScreenProps {
   itemName: string;
@@ -17,6 +28,12 @@ interface DataScreenProps {
 }
 
 export const DataScreen = ({ itemName, prices, quantities, category }: DataScreenProps) => {
+  // Call the hook inside your component!
+  const { width } = useWindowDimensions();
+  const chartWidth = width - 32; // Adjust for margins/padding as needed
+  const isWeb = Platform.OS === 'web';
+  const adjustedChartWidth = isWeb ? chartWidth * 0.95 : chartWidth;
+
   const [displayType, setDisplayType] = useState<'price' | 'quantity'>('price');
   const [timeRange, setTimeRange] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
   const router = useRouter();
@@ -28,7 +45,7 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
     });
   };
 
-  const getData = () => displayType === 'price' ? prices : quantities;
+  const getData = () => (displayType === 'price' ? prices : quantities);
 
   const filterData = (data: { date: Date; value: number }[]) => {
     const now = new Date();
@@ -53,14 +70,16 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
     <Pressable
       style={[
         styles.timeRangeButton,
-        timeRange === value && styles.timeRangeButtonActive
+        timeRange === value && styles.timeRangeButtonActive,
       ]}
       onPress={() => setTimeRange(value)}
     >
-      <Text style={[
-        styles.timeRangeButtonText,
-        timeRange === value && styles.timeRangeButtonTextActive
-      ]}>
+      <Text
+        style={[
+          styles.timeRangeButtonText,
+          timeRange === value && styles.timeRangeButtonTextActive,
+        ]}
+      >
         {title}
       </Text>
     </Pressable>
@@ -70,14 +89,16 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
     <Pressable
       style={[
         styles.displayTypeButton,
-        displayType === value && styles.displayTypeButtonActive
+        displayType === value && styles.displayTypeButtonActive,
       ]}
       onPress={() => setDisplayType(value)}
     >
-      <Text style={[
-        styles.displayTypeButtonText,
-        displayType === value && styles.displayTypeButtonTextActive
-      ]}>
+      <Text
+        style={[
+          styles.displayTypeButtonText,
+          displayType === value && styles.displayTypeButtonTextActive,
+        ]}
+      >
         {title}
       </Text>
     </Pressable>
@@ -107,14 +128,14 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
 
       <View style={styles.chartContainer}>
         <VictoryChart
-          width={chartWidth}
+          width={adjustedChartWidth}
           height={300} 
           theme={VictoryTheme.material}
           padding={{ top: 20, bottom: 50, left: 60, right: 20 }}
           containerComponent={
             <VictoryVoronoiContainer
               voronoiDimension="x"
-              labels={({ datum }) => 
+              labels={({ datum }) =>
                 `${new Date(datum.date).toLocaleDateString()}\n${
                   displayType === 'price' ? '$' : ''
                 }${datum.value.toFixed(2)}${
@@ -135,21 +156,21 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
           }
         >
           <VictoryAxis
-            tickFormat={(x: number) => 
-              new Date(x).toLocaleDateString('en-US', { 
+            tickFormat={(x: number) =>
+              new Date(x).toLocaleDateString('en-US', {
                 month: 'short',
-                day: timeRange === 'yearly' ? undefined : 'numeric'
+                day: timeRange === 'yearly' ? undefined : 'numeric',
               })
             }
             style={{
-              tickLabels: { angle: -45, fontSize: 10, padding: 15 }
+              tickLabels: { angle: -45, fontSize: 10, padding: 15 },
             }}
           />
           <VictoryAxis
             dependentAxis
             label={displayType === 'price' ? 'Price ($)' : 'Quantity'}
             style={{
-              axisLabel: { padding: 35 }
+              axisLabel: { padding: 35 },
             }}
           />
           <VictoryLine
@@ -157,14 +178,11 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
             x="date"
             y="value"
             style={{
-              data: { 
-                stroke: Colors.light.tint,
-                strokeWidth: 2
-              }
+              data: { stroke: Colors.light.tint, strokeWidth: 2 },
             }}
             animate={{
               duration: 300,
-              onLoad: { duration: 300 }
+              onLoad: { duration: 300 },
             }}
           />
         </VictoryChart>
@@ -175,7 +193,8 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
           <Text style={styles.statLabel}>Average</Text>
           <Text style={styles.statValue}>
             {displayType === 'price' ? '$' : ''}
-            {(filteredData.reduce((sum, item) => sum + item.value, 0) / filteredData.length).toFixed(2)}
+            {(filteredData.reduce((sum, item) => sum + item.value, 0) /
+              filteredData.length).toFixed(2)}
             {displayType === 'quantity' ? ' units' : ''}
           </Text>
         </View>

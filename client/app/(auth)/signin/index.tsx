@@ -6,6 +6,7 @@ import LoadingScreen from "@client/components/screens/loading-screen";
 import AuthScreen from "@client/components/screens/auth-screen";
 import { useMessage } from "@client/contexts/message-context";
 import { router } from "expo-router";
+import SansitaText from "@client/components/texts/sansita-text";
 
 export default function SigninScreen() {
     const [email, setEmail] = useState('');
@@ -74,8 +75,8 @@ export default function SigninScreen() {
                     resizeMode="contain"
                 />
                 <View style={styles.form}>
-                    <View style={{width: '100%'}}>
-                        <Text style={styles.title}>Sign In</Text>
+                    <View style={{width: '100%', display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center'}}>
+                        <SansitaText text="Sign In to your account" fontSize="20" lineHeight="auto"></SansitaText>
                     </View>
                     <AuthInput 
                         placeholder="Email"

@@ -7,6 +7,7 @@ import AuthScreen from "@client/components/screens/auth-screen";
 import { useMessage } from "@client/contexts/message-context";
 import verificationService from "@client/services/user-verification";
 import { router } from "expo-router";
+import SansitaText from "@client/components/texts/sansita-text";
 
 export default function SignUpScreen() {
     const [formData, setFormData] = useState({
@@ -75,8 +76,8 @@ export default function SignUpScreen() {
                     resizeMode="contain"
                 />
                 <View style={styles.form}>
-                    <View style={{width: '100%'}}>
-                        <Text style={styles.title}>Sign Up</Text>
+                    <View style={{width: '100%', flexDirection: 'row', justifyContent: 'center'}}>
+                        <SansitaText text="Create an Account" fontSize="20" lineHeight="auto"></SansitaText>
                     </View>
                     <AuthInput 
                         placeholder="Username"

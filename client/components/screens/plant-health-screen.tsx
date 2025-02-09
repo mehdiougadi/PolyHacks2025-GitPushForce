@@ -1,9 +1,10 @@
-import { Camera } from 'expo-camera';
-import { useState, useRef } from 'react';
-import { Button, View, Image, ActivityIndicator } from 'react-native';
+import { Camera, CameraType } from 'expo-camera';
+import { useState, useRef, useEffect } from 'react';
+import { Button, View, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import { PLANT_ID_API_KEY } from "@client/constants/api-key";
-import PlantHealthReport from '@client/components/plant-health-report';
-
+import PlantHealthReport from "@client/components/plant-health-report";
+import { Colors } from "@client/constants/Colors";
+import { useColorScheme } from 'react-native';
 
 export default function PlantHealthScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);
@@ -11,11 +12,15 @@ export default function PlantHealthScreen() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const cameraRef = useRef<Camera>(null);
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
 
-  const requestPermissions = async () => {
-    const { status } = await Camera.requestCameraPermissionsAsync();
-    setHasPermission(status === 'granted');
-  };
+  useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
 
   const takePhoto = async () => {
     if (cameraRef.current) {
@@ -33,7 +38,7 @@ export default function PlantHealthScreen() {
       
       const formData = new FormData();
       formData.append('images', blob as any);
-      formData.append('key', 'YOUR_PLANT.ID_API_KEY');
+      formData.append('key', PLANT_ID_API_KEY);
 
       const apiResponse = await fetch('https://api.plant.id/v2/health_assessment', {
         method: 'POST',
@@ -54,33 +59,56 @@ export default function PlantHealthScreen() {
 
   if (hasPermission === null) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <Button title="Request Camera Permission" onPress={requestPermissions} />
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <ActivityIndicator size="large" color={colors.tint} />
+      </View>
+    );
+  }
+
+  if (!hasPermission) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Button 
+          title="Request Camera Permission" 
+          onPress={() => Camera.requestCameraPermissionsAsync()} 
+          color={colors.tint}
+        />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       {photo ? (
-        <Image source={{ uri: photo }} style={{ flex: 1 }} />
+        <Image source={{ uri: photo }} style={styles.camera} />
       ) : (
-        <Camera style={{ flex: 1 }} ref={cameraRef} />
-      )}
-      
-      {loading && <ActivityIndicator size="large" style={{ position: 'absolute' }} />}
-      
-      {!photo && (
-        <Button
-          title="Take Photo"
-          onPress={takePhoto}
-          disabled={loading}
-          style={{ position: 'absolute', bottom: 20, alignSelf: 'center' }}
+        <Camera 
+          style={styles.camera} 
+          ref={cameraRef}
+          type={CameraType.back}
         />
       )}
       
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.tint} />
+        </View>
+      )}
+      
+      {!photo && (
+        <View style={styles.buttonContainer}>
+          <Button
+            title="Take Photo"
+            onPress={takePhoto}
+            disabled={loading}
+            color={colors.tint}
+          />
+        </View>
+      )}
+      
       {result && (
-        <PlantHealthReport result={result} 
+        <PlantHealthReport 
+          result={result} 
           onRetake={() => {
             setPhoto(null);
             setResult(null);
@@ -90,3 +118,31 @@ export default function PlantHealthScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  camera: {
+    flex: 1,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    padding: 10,
+    borderRadius: 20,
+  },
+});

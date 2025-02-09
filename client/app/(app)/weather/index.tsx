@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, Button, ActivityIndicator } from 'react-native';
-import { WEATHER_API_KEY } from '../../../constants/api-key'; 
+import { WEATHER_API_KEY } from '@client/constants/api-key'; 
 import axios from 'axios';
 
 const Weather = () => {

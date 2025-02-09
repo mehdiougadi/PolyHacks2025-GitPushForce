@@ -5,6 +5,7 @@ import axios from 'axios';
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from 'expo-router';
 import { Colors } from '@client/constants/Colors';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface WeatherImages {
   sunny: ImageSourcePropType;
@@ -93,7 +94,7 @@ const Weather: React.FC = () => {
   };
 
   return (
-    <View style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1}}>
       <View style={{backgroundColor: '#fff'}}>
         <View style={styles.header}>
             <Pressable onPress={handleBack} style={styles.backButton}>
@@ -180,7 +181,7 @@ const Weather: React.FC = () => {
         )}
       </View>
     </ScrollView>
-    </View>
+    </SafeAreaView>
 
   );
 };

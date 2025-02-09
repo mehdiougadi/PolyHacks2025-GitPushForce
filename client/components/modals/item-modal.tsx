@@ -117,6 +117,7 @@ export default function InventoryModal({
 
           <TextInput
             style={styles.input}
+            placeholderTextColor={'#000'}
             placeholder="Item Name"
             value={name}
             onChangeText={setName}
@@ -148,6 +149,7 @@ export default function InventoryModal({
 
           <TextInput
             style={styles.input}
+            placeholderTextColor={'#000'}
             placeholder="Unit (e.g., kg, pieces)"
             value={unit}
             onChangeText={setUnit}
@@ -155,6 +157,7 @@ export default function InventoryModal({
 
           <TextInput
             style={styles.input}
+            placeholderTextColor={'#000'}
             placeholder="Average Price (optional)"
             value={averagePrice}
             onChangeText={setAveragePrice}
@@ -163,6 +166,7 @@ export default function InventoryModal({
 
           <TextInput
             style={styles.input}
+            placeholderTextColor={'#000'}
             placeholder="Sell Price (optional)"
             value={sellPrice}
             onChangeText={setSellPrice}
@@ -225,6 +229,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
+    color: '#000',
   },
   quantityContainer: {
     flexDirection: 'row',
@@ -253,6 +258,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     fontSize: 16,
     textAlign: 'center',
+    color: '#000',
   },
   buttonContainer: {
     flexDirection: 'row',

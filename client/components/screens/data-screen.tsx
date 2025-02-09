@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, SafeAreaView,useWindowDimensions,Platform } from 'react-native';
 import { VictoryChart, VictoryLine, VictoryAxis, VictoryTheme, VictoryTooltip, VictoryVoronoiContainer } from 'victory-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
+
+const { width } = useWindowDimensions();
+
+const chartWidth = width - 32;
 
 interface DataScreenProps {
   itemName: string;
@@ -103,6 +107,8 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
 
       <View style={styles.chartContainer}>
         <VictoryChart
+          width={chartWidth}
+          height={300} 
           theme={VictoryTheme.material}
           padding={{ top: 20, bottom: 50, left: 60, right: 20 }}
           containerComponent={

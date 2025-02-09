@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Button } from 'react-native';
 import { VictoryChart, VictoryLine, VictoryAxis, VictoryTheme } from 'victory-native';
 import { Colors } from '../../constants/Colors';
-import { parsePriceData, parseQuantityData } from '@client/utils/data-parser';
 
 interface DataScreenProps {
   itemName: string;

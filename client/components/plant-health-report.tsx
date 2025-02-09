@@ -2,7 +2,24 @@ import { View, Text, Button, StyleSheet } from 'react-native';
 import { Colors } from "@client/constants/Colors";
 import { useColorScheme } from 'react-native';
 
-export default function PlantHealthReport({ result, onRetake }) {
+interface Disease {
+    name: string;
+    probability: number;
+    disease_description: string;
+  }
+  
+interface HealthAssessment {
+    diseases: Disease[];
+  }
+  
+interface PlantHealthReportProps {
+    result: {
+      health_assessment?: HealthAssessment;
+    };
+    onRetake: () => void;
+  }
+
+  export default function PlantHealthReport({ result, onRetake }: PlantHealthReportProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 

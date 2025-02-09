@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@client/firebase';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Colors } from '@client/constants/Colors';
 
 export default function UserItemsScreen() {
   const { category } = useLocalSearchParams();  
@@ -18,6 +18,10 @@ export default function UserItemsScreen() {
   const [editingItem, setEditingItem] = useState<Item | undefined>();
   const { showMessage } = useMessage();
   const router = useRouter();
+
+  const handleBack = () => {
+      router.back();
+  };
 
   const updateFirestore = async (updatedItems: Item[]) => {
     if (!user) return;
@@ -83,10 +87,6 @@ export default function UserItemsScreen() {
     } catch (error) {
       showMessage("Failed to save item");
     }
-  };
-
-  const handleBack = () => {
-    router.back();
   };
 
   const handleViewData = (itemName: string) => {

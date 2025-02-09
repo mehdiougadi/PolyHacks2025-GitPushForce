@@ -2,7 +2,7 @@ import DefaultScreen from '@client/components/screens/default-screen';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { Colors } from '@client/constants/Colors';
 
 export default function AdvisorScreen(){
     const router = useRouter();

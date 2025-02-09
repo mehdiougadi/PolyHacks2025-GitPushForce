@@ -3,7 +3,7 @@ import DefaultScreen from "@client/components/screens/default-screen";
 import { Pressable, StyleSheet, View, Text } from "react-native";
 import categories from "@client/constants/categories";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Colors } from "@client/constants/Colors";
 import { useRouter } from "expo-router";
 
 export default function InventoryScreen(){

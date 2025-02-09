@@ -11,7 +11,6 @@ import { db } from '@client/firebase';
 
 export default function UserItemsScreen() {
   const { category } = useLocalSearchParams();  
-  console.log(category); 
   const { user, updateUser } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | undefined>();
@@ -97,7 +96,7 @@ export default function UserItemsScreen() {
       </View>
       <View style={styles.buttonContainer}>
         <Link href={`/inventory/${item.name}/data`} asChild>
-          <Button title="View Data" color={Colors.light.tint} />
+          <Button title="View Data" color={'#3d3d3d'} />
         </Link>
         <Button
           title="Edit"

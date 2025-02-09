@@ -29,16 +29,16 @@ export default function AuthInput({ placeholder, onChangeText, value, inputMode 
 const styles = StyleSheet.create({
     inputContainer: {
         width: "100%",
-        borderRadius: 8,
         backgroundColor: '#fff',
-        borderColor: '#D3D3D3',
-        borderWidth: 1,
-        height: 56,
         justifyContent: "center",
-        paddingHorizontal: 16,
     },
     input: {
         fontSize: 16,
+        paddingHorizontal: 16,
+        height: 56,
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#D3D3D3',
         color: '#1E1D1D',
         width: "100%",
     },

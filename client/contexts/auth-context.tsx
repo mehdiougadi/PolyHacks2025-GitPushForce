@@ -123,7 +123,8 @@ function AuthContextProvider({ children }: AuthContextProps) {
                     username: userData.username,
                     firstName: userData.firstName,
                     lastName: userData.lastName,
-                    profilePicture: userData.profilePicture
+                    profilePicture: userData.profilePicture,
+                    items: [],
                 };
                 await setDoc(doc(db, "users", newUser.uid), newUser);
 

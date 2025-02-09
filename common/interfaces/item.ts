@@ -3,7 +3,7 @@ export default interface Item{
     icon: string;
     category: string;
     quantity: number;
-    averagePrice: number;
-    sellPrice: number;
+    averagePrice?: number;
+    sellPrice?: number;
     unit: string;
 }

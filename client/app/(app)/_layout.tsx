@@ -6,13 +6,10 @@ export default function AppLayout() {
       headerShown: false,
       tabBarStyle: { display: 'none' }  }}>
       <Tabs.Screen 
-        name="home/index" 
+        name="inventory/index" 
       />
       <Tabs.Screen 
-        name="inventory" 
-      />
-      <Tabs.Screen 
-        name="advisor/index" 
+        name="inventory/[category]" 
       />
     </Tabs>
   );

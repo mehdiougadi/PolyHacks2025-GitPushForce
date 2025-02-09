@@ -27,6 +27,11 @@ const features: Feature[] = [
         route: "/(app)/todo",
     },
     
+    {
+        name: "Plant Health",
+        icon: require("@client/assets/icons/features/plant-health-logo.png"),
+        route: "/(app)/plant-health",
+    },
 ];
 
 export default features;

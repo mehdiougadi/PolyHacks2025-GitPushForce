@@ -1,10 +1,12 @@
 import { View, Text, FlatList, Button, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import Item from '@common/interfaces/item';
-import { useSegments } from "expo-router";
+import { useSegments, Link } from "expo-router";
 import { useAuth } from '@client/contexts/auth-context';
 import InventoryModal from '@client/components/modals/item-modal';
 import { useMessage } from '@client/contexts/message-context';
+import { Colors } from '../../../constants/Colors';
+import { INVENTORY_CATEGORIES, InventoryItem } from '../../../constants/InventoryCategories';
 
 export default function InventoryScreen() {
   const segments = useSegments();
@@ -69,6 +71,9 @@ export default function InventoryScreen() {
         )}
       </View>
       <View style={styles.buttonContainer}>
+        <Link href={`/inventory/${item.name}/data`} asChild>
+          <Button title="View Data" color={Colors.light.tint} />
+        </Link>
         <Button
           title="Edit"
           onPress={() => handleEditItem(item)}

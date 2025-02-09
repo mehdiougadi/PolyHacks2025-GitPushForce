@@ -28,7 +28,8 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
   const isWeb = Platform.OS === 'web';
   const adjustedChartWidth = isWeb ? chartWidth * 0.95 : chartWidth;
 
-  const [displayType, setDisplayType] = useState<'price' | 'quantity'>('price');
+  const [displayTypePrice, setDisplayTypePrice] = useState<'price' | 'quantity'>('price');
+  const [displayTypeQuantity, setDisplayTypeQuantity] = useState<'price' | 'quantity'>('quantity');
   const [timeRange, setTimeRange] = useState<'month' | 'threeMonths' | 'sixMonths'>('month');
   const router = useRouter();
 
@@ -39,7 +40,8 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
     });
   };
 
-  const getData = () => (displayType === 'price' ? prices : quantities);
+  const getDataPrice = () => (displayTypePrice === 'price' ? prices : quantities);
+  const getDataQuantity = () => (displayTypeQuantity === 'price' ? prices : quantities);
 
   const filterData = (data: { date: Date; value: number }[]) => {
     const now = new Date();
@@ -59,7 +61,8 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
     return data.filter((d) => new Date(d.date) > cutoffDate);
   };
 
-  const filteredData = filterData(getData());
+  const filteredData = filterData(getDataPrice());
+  const filteredData2 = filterData(getDataQuantity());
   const averagePrice = (filteredData.reduce((sum, item) => sum + item.value, 0) / filteredData.length).toFixed(2);
   const highestPrice = Math.max(...filteredData.map((item) => item.value)).toFixed(2);
 
@@ -96,7 +99,7 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.chartContainer}>
           <View style={{flexDirection: 'row', justifyContent: 'center'}}>
-            <SansitaText text={'Graphical value in the market'} lineHeight='auto' fontSize='16'></SansitaText>
+            <SansitaText text={'Graphical price in the market'} lineHeight='auto' fontSize='16'></SansitaText>
           </View>
           <LineChart
             data={{
@@ -105,6 +108,39 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
               ),
               datasets: [{
                 data: filteredData.map((d) => d.value),
+                color: () => 'green',
+                strokeWidth: 2,
+              }],
+            }}
+            width={adjustedChartWidth}
+            height={300}
+            chartConfig={{
+              backgroundGradientFrom: '#f8f8f8',
+              backgroundGradientTo: '#f8f8f8',
+              color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              propsForDots: {
+                r: '4',
+                strokeWidth: '2',
+                stroke: 'green',
+              },
+            }}
+            bezier
+            style={styles.chart}
+          />
+        </View>
+
+        <View style={styles.chartContainer}>
+          <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+            <SansitaText text={'Graphical stock in the market'} lineHeight='auto' fontSize='16'></SansitaText>
+          </View>
+          <LineChart
+            data={{
+              labels: filteredData2.map((d) =>
+                new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+              ),
+              datasets: [{
+                data: filteredData2.map((d) => d.value),
                 color: () => 'green',
                 strokeWidth: 2,
               }],

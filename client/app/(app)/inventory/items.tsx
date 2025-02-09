@@ -1,4 +1,4 @@
-import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import React, { useState } from 'react';
 import Item from '@common/interfaces/item';
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -8,6 +8,8 @@ import { useMessage } from '@client/contexts/message-context';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@client/firebase';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 export default function UserItemsScreen() {
   const { category } = useLocalSearchParams();  
@@ -83,6 +85,10 @@ export default function UserItemsScreen() {
     }
   };
 
+  const handleBack = () => {
+    router.back();
+  };
+
   const handleViewData = (itemName: string) => {
     router.push({
       pathname: `/inventory/${itemName}/data` as any,
@@ -129,6 +135,12 @@ export default function UserItemsScreen() {
 
   return (
     <SafeAreaView style={{flex: 1, backgroundColor: '#FFF'}}>
+      <View style={styles.header}>
+        <Pressable onPress={handleBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={Colors.light.tint} />
+        </Pressable>
+        <Text style={styles.headerTitle}>{category}</Text>
+      </View>
       <View style={styles.container}>
         {filteredItems.length === 0 ? (
           <View style={styles.emptyState}>
@@ -164,6 +176,22 @@ export default function UserItemsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
   },
   list: {
     padding: 16,

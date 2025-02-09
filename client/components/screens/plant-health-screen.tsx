@@ -1,35 +1,33 @@
-import { Camera } from 'expo-camera';
-import { useState, useRef, useEffect } from 'react';
+import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useState, useRef } from 'react';
 import { Button, View, Image, ActivityIndicator, StyleSheet } from 'react-native';
-import { PLANT_ID_API_KEY } from "@client/constants/api-key";
-import PlantHealthReport from "@client/components/plant-health-report";
-import { Colors } from "@client/constants/Colors";
+import { PLANT_ID_API_KEY } from '@client/constants/api-key';
+import PlantHealthReport from '@client/components/plant-health-report';
+import { Colors } from '@client/constants/Colors';
 import { useColorScheme } from 'react-native';
 
 export default function PlantHealthScreen() {
-  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  // State for photo URI, loading state, and analysis result
   const [photo, setPhoto] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
-  const cameraRef = useRef<Camera>(null);
+  const cameraRef = useRef<any>(null);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
-      setHasPermission(status === 'granted');
-    })();
-  }, []);
+  // Use the new permissions hook from expo-camera
+  const [permission, requestPermission] = useCameraPermissions();
 
+  // Function to take a photo
   const takePhoto = async () => {
     if (cameraRef.current) {
-      const photo = await cameraRef.current.takePictureAsync();
-      setPhoto(photo.uri);
-      analyzePhoto(photo.uri);
+      const photoData = await cameraRef.current.takePictureAsync();
+      setPhoto(photoData.uri);
+      analyzePhoto(photoData.uri);
     }
   };
 
+  // Function to send the photo to the plant health API for analysis
   const analyzePhoto = async (uri: string) => {
     setLoading(true);
     try {
@@ -57,7 +55,8 @@ export default function PlantHealthScreen() {
     }
   };
 
-  if (hasPermission === null) {
+  // If permission information is still loading, show a loading indicator
+  if (!permission) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <ActivityIndicator size="large" color={colors.tint} />
@@ -65,27 +64,30 @@ export default function PlantHealthScreen() {
     );
   }
 
-  if (!hasPermission) {
+  // If permissions are not granted, show a button to request them
+  if (!permission.granted) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
         <Button 
           title="Request Camera Permission" 
-          onPress={() => Camera.requestCameraPermissionsAsync()} 
+          onPress={requestPermission} 
           color={colors.tint}
         />
       </View>
     );
   }
 
+  // Main UI when permissions are granted
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {photo ? (
         <Image source={{ uri: photo }} style={styles.camera} />
       ) : (
-        <Camera 
+        // Use the Camera component with the new CameraType for specifying the back camera
+        <CameraView 
           style={styles.camera} 
           ref={cameraRef}
-          type={Camera.Constants.Type}
+          type="back"
         />
       )}
       
@@ -95,6 +97,7 @@ export default function PlantHealthScreen() {
         </View>
       )}
       
+      {/* Only show the "Take Photo" button if a photo has not yet been taken */}
       {!photo && (
         <View style={styles.buttonContainer}>
           <Button
@@ -106,6 +109,7 @@ export default function PlantHealthScreen() {
         </View>
       )}
       
+      {/* Display the plant health report if results are available */}
       {result && (
         <PlantHealthReport 
           result={result} 

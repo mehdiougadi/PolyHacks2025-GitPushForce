@@ -1,6 +1,6 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "@client/firebase"; 
 import UserSignUp from '@common/interfaces/user-signup';
 import User from '@common/interfaces/user';
@@ -48,13 +48,35 @@ function AuthContextProvider({ children }: AuthContextProps) {
     }, []);
 
     useEffect(() => {
+        let unsubscribe: () => void;
+
+        if (auth.currentUser) {
+            const userRef = doc(db, "users", auth.currentUser.uid);
+            unsubscribe = onSnapshot(userRef, (doc) => {
+                if (doc.exists()) {
+                    const userData = doc.data() as User;
+                    setUser(userData);
+                }
+            }, (error) => {
+                console.error("Error listening to user updates:", error);
+            });
+        }
+
+        return () => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        };
+    }, [auth.currentUser]);
+
+    useEffect(() => {
         if (isLoading) return;
         if (isAuthenticated === null) return;
 
         const navigate = async () => {
             try {
                 if (isAuthenticated) {
-                    await router.navigate('/(app)/home');
+                    await router.replace('/(app)/home');
                 } else {
                     await router.replace('/(auth)/entry');
                 }

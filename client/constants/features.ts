@@ -8,7 +8,7 @@ const features: Feature[] = [
     },
     {
         name: "Inventory",
-        icon: require("@client/assets/icons/features/weither-logo.png"),
+        icon: require("@client/assets/icons/features/box-logo.png"),
         route: "/(app)/inventory",
     },
     {

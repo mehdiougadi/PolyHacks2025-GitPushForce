@@ -1,13 +1,15 @@
-import { View, Text, FlatList, Button, StyleSheet } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Pressable } from 'react-native';
 import React, { useState } from 'react';
 import Item from '@common/interfaces/item';
-import { useSegments, Link, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from '@client/contexts/auth-context';
 import InventoryModal from '@client/components/modals/item-modal';
 import { useMessage } from '@client/contexts/message-context';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@client/firebase';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '@client/constants/Colors';
 
 export default function UserItemsScreen() {
   const { category } = useLocalSearchParams();  
@@ -15,6 +17,11 @@ export default function UserItemsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | undefined>();
   const { showMessage } = useMessage();
+  const router = useRouter();
+
+  const handleBack = () => {
+      router.back();
+  };
 
   const updateFirestore = async (updatedItems: Item[]) => {
     if (!user) return;
@@ -82,6 +89,13 @@ export default function UserItemsScreen() {
     }
   };
 
+  const handleViewData = (itemName: string) => {
+    router.push({
+      pathname: `/inventory/${itemName}/data` as any,
+      params: { category }
+    });
+  };
+
   const renderItem = ({ item }: { item: Item }) => (
     <View style={styles.item}>
       <View style={styles.itemContent}>
@@ -95,19 +109,24 @@ export default function UserItemsScreen() {
         )}
       </View>
       <View style={styles.buttonContainer}>
-        <Link href={`/inventory/${item.name}/data`} asChild>
-          <Button title="View Data" color={'#3d3d3d'} />
-        </Link>
-        <Button
-          title="Edit"
+        <TouchableOpacity 
+          onPress={() => handleViewData(item.name)}
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>View Data</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
           onPress={() => handleEditItem(item)}
-          color="#121212"
-        />
-        <Button
-          title="Delete"
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
           onPress={() => handleDeleteItem(item.name)}
-          color="#dc3545"
-        />
+          style={[styles.button, styles.deleteButton]}
+        >
+          <Text style={styles.buttonText}>Delete</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -115,7 +134,13 @@ export default function UserItemsScreen() {
   const filteredItems = (user?.items || []).filter((item) => item.category.toLowerCase() === category.toLowerCase());
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#FFF'}}>
+      <View style={styles.header}>
+        <Pressable onPress={handleBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={Colors.light.tint} />
+        </Pressable>
+        <Text style={styles.headerTitle}>{category}</Text>
+      </View>
       <View style={styles.container}>
         {filteredItems.length === 0 ? (
           <View style={styles.emptyState}>
@@ -131,19 +156,17 @@ export default function UserItemsScreen() {
             showsVerticalScrollIndicator={false}
           />
         )}
-        <View style={styles.bottomButton}>
-          <Button
-            title="Add New Item"
-            onPress={handleAddItem}
-            color="#121212"
-          />
+        <View>
+          <TouchableOpacity onPress={handleAddItem}style={styles.bottomButton}>
+            <Text style={{color: '#000', fontSize: 16}}>Add New Item</Text>
+          </TouchableOpacity>
         </View>
         <InventoryModal
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           onSave={handleSaveItem}
           editItem={editingItem}
-          category={category}
+          category={category as string}
         />
       </View>
     </SafeAreaView>
@@ -153,7 +176,22 @@ export default function UserItemsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
   },
   list: {
     padding: 16,
@@ -164,11 +202,13 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 4,
   },
   itemContent: {
     marginBottom: 10,
@@ -193,20 +233,39 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     gap: 10,
   },
+  button: {
+    backgroundColor: '#121212',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  deleteButton: {
+    backgroundColor: '#dc3545',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
+  },
   bottomButton: {
     position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    bottom: 16,
+    left: 16,  
+    right: 16,
     padding: 16,
     backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
+    alignItems: 'center', 
+    justifyContent: 'center', 
   },
   emptyState: {
     flex: 1,

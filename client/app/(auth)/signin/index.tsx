@@ -5,6 +5,7 @@ import { useAuth } from "@client/contexts/auth-context";
 import LoadingScreen from "@client/components/screens/loading-screen";
 import AuthScreen from "@client/components/screens/auth-screen";
 import { useMessage } from "@client/contexts/message-context";
+import { router } from "expo-router";
 
 export default function SigninScreen() {
     const [email, setEmail] = useState('');
@@ -94,6 +95,12 @@ export default function SigninScreen() {
                         <Text style={styles.buttonText}>Sign In</Text>
                     </TouchableOpacity>
                 </View>
+                <TouchableOpacity 
+                    style={styles.signupLink}
+                    onPress={() => router.navigate('/(auth)/signup')}
+                >
+                    <Text style={styles.signupText}>Not Registered? Create an account!</Text>
+                </TouchableOpacity> 
             </View>
         </AuthScreen>
     );
@@ -105,6 +112,15 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         marginBottom: 80,
+    },
+    signupLink: {
+        marginTop: 16,
+    },
+    signupText: {
+        color: '#013220',
+        textDecorationLine: 'underline',
+        fontSize: 16,
+        fontFamily: 'System',
     },
     title: {
         fontSize: 24,

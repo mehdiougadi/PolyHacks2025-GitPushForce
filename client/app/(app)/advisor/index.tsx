@@ -1,15 +1,46 @@
 import DefaultScreen from '@client/components/screens/default-screen';
-import ReturnHome from '@client/components/return-home';
-import { Text } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '@client/constants/Colors';
 import React from 'react';
 import ChatBot from '@client/components/chatbot/ChatBot';
 
 export default function AdvisorScreen(){
+    const router = useRouter();
+
+    const handleBack = () => {
+        router.back();
+        };
+
     return (
         <DefaultScreen>
-            <Text style={{ fontSize: 20, fontWeight: '600', marginBottom: 16 }}>Agricultural Advisor</Text>
+            <View style={styles.header}>
+                <Pressable onPress={handleBack} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={Colors.light.tint} />
+                </Pressable>
+                <Text style={styles.headerTitle}>Home</Text>
+            </View>
             <ChatBot />
-            <ReturnHome />
         </DefaultScreen>
     );
 }
+
+const styles = StyleSheet.create({
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+      },
+      backButton: {
+        padding: 8,
+        marginRight: 8,
+      },
+      headerTitle: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#333',
+      },
+})

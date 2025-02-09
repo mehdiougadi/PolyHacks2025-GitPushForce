@@ -20,7 +20,7 @@ export default function SignUpScreen() {
     const updateField = (field: string, value: string) => {
         setFormData(prev => ({
             ...prev,
-            [field]: value
+            [field]: value.trim()
         }));
     };
     const { signUp, isLoading } = useAuth();

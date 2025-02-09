@@ -5,7 +5,7 @@ import { db } from "@client/firebase";
 const verificationService = {
     usernameRegex: /^[a-zA-Z0-9_-]{3,20}$/,
     emailRegex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    passwordRegex: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/,
+    passwordRegex: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$/,
 
     validateSignup: (data: UserSignUp): string[] => {
         const errors: string[] = [];

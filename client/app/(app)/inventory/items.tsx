@@ -5,26 +5,51 @@ import { useSegments } from "expo-router";
 import { useAuth } from '@client/contexts/auth-context';
 import InventoryModal from '@client/components/modals/item-modal';
 import { useMessage } from '@client/contexts/message-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@client/firebase';
 
-export default function InventoryScreen() {
+export default function UserItemsScreen() {
   const segments = useSegments();
-  const category = segments[segments.length - 1];
+  const category = segments[segments.length - 1]?.replace(/[\[\]]/g, '').trim() || '';
+  console.log(category);
   const { user, updateUser } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | undefined>();
   const { showMessage } = useMessage();
+
+  const updateFirestore = async (updatedItems: Item[]) => {
+    if (!user) return;
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const cleanedItems = updatedItems.map(item => ({
+        ...item,
+        averagePrice: item.averagePrice ?? null,
+        sellPrice: item.sellPrice ?? null
+      }));
+      await updateDoc(userRef, {
+        items: cleanedItems
+      });
+    } catch (error) {
+      showMessage("Failed to sync with database");
+    }
+  };
 
   const handleEditItem = (item: Item) => {
     setEditingItem(item);
     setModalVisible(true);
   };
 
-  const handleDeleteItem = (itemName: string) => {
-    showMessage("Are you sure you want to delete this item?");
+  const handleDeleteItem = async (itemName: string) => {
     if (user) {
       const updatedItems = (user.items || []).filter(item => item.name !== itemName);
-      updateUser({ ...user, items: updatedItems });
-      showMessage("Item deleted successfully");
+      try {
+        await updateFirestore(updatedItems);
+        updateUser({ ...user, items: updatedItems });
+        showMessage("Item deleted successfully");
+      } catch (error) {
+        showMessage("Failed to delete item");
+      }
     }
   };
 
@@ -33,9 +58,8 @@ export default function InventoryScreen() {
     setModalVisible(true);
   };
 
-  const handleSaveItem = (item: Item) => {
+  const handleSaveItem = async (item: Item) => {
     if (!user) return;
-
     const currentItems = user.items || [];
     let updatedItems: Item[];
     
@@ -43,17 +67,21 @@ export default function InventoryScreen() {
       updatedItems = currentItems.map(existingItem =>
         existingItem.name === editingItem.name ? item : existingItem
       );
-      showMessage("Item updated successfully");
     } else {
       if (currentItems.some(existingItem => existingItem.name === item.name)) {
         showMessage("An item with this name already exists");
         return;
       }
       updatedItems = [...currentItems, item];
-      showMessage("Item added successfully");
     }
-    
-    updateUser({ ...user, items: updatedItems });
+    try {
+      await updateFirestore(updatedItems);
+      updateUser({ ...user, items: updatedItems });
+      showMessage(editingItem ? "Item updated successfully" : "Item added successfully");
+      setModalVisible(false);
+    } catch (error) {
+      showMessage("Failed to save item");
+    }
   };
 
   const renderItem = ({ item }: { item: Item }) => (
@@ -83,39 +111,41 @@ export default function InventoryScreen() {
     </View>
   );
 
-  const filteredItems = (user?.items || []).filter((item) => item.category === category);
+  const filteredItems = (user?.items || []).filter((item) => item.category.toLowerCase() === category.toLowerCase());
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Button
-          title="Add New Item"
-          onPress={handleAddItem}
-          color="#121212"
+    <SafeAreaView style={{flex: 1}}>
+      <View style={styles.container}>
+        {filteredItems.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No items in this category</Text>
+            <Text style={styles.emptyStateSubtext}>Tap "Add New Item" to get started</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={filteredItems}
+            renderItem={renderItem}
+            keyExtractor={item => item.name}
+            contentContainerStyle={styles.list}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+        <View style={styles.bottomButton}>
+          <Button
+            title="Add New Item"
+            onPress={handleAddItem}
+            color="#121212"
+          />
+        </View>
+        <InventoryModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          onSave={handleSaveItem}
+          editItem={editingItem}
+          category={category}
         />
       </View>
-      {filteredItems.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>No items in this category</Text>
-          <Text style={styles.emptyStateSubtext}>Tap "Add New Item" to get started</Text>
-        </View>
-      ) : (
-        <FlatList
-          data={filteredItems}
-          renderItem={renderItem}
-          keyExtractor={item => item.name}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
-      <InventoryModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
-        onSave={handleSaveItem}
-        editItem={editingItem}
-        category={category}
-      />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -124,15 +154,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
-  header: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
   list: {
     padding: 16,
-    paddingBottom: 20,
+    paddingBottom: 80,
   },
   item: {
     backgroundColor: '#fff',
@@ -167,6 +191,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 10,
+  },
+  bottomButton: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
   emptyState: {
     flex: 1,

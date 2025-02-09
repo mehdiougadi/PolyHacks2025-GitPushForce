@@ -8,7 +8,6 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert
 } from 'react-native';
 import Item from '@common/interfaces/item';
 import { useMessage } from '@client/contexts/message-context';
@@ -29,7 +28,7 @@ export default function InventoryModal({
   category
 }: InventoryModalProps) {
   const [name, setName] = useState('');
-  const [quantity, setQuantity] = useState('0');
+  const [quantity, setQuantity] = useState(0);
   const [unit, setUnit] = useState('');
   const [averagePrice, setAveragePrice] = useState('');
   const [sellPrice, setSellPrice] = useState('');
@@ -38,7 +37,7 @@ export default function InventoryModal({
   useEffect(() => {
     if (editItem) {
       setName(editItem.name);
-      setQuantity(editItem.quantity.toString());
+      setQuantity(editItem.quantity);
       setUnit(editItem.unit);
       setAveragePrice(editItem.averagePrice?.toString() || '');
       setSellPrice(editItem.sellPrice?.toString() || '');
@@ -49,10 +48,30 @@ export default function InventoryModal({
 
   const resetForm = () => {
     setName('');
-    setQuantity('0');
+    setQuantity(0);
     setUnit('');
     setAveragePrice('');
     setSellPrice('');
+  };
+
+  const handleQuantityChange = (text: string) => {
+    const cleanedText = text.replace(/[^0-9]/g, '');
+    if (cleanedText === '') {
+      setQuantity(0);
+    } else {
+      const newValue = parseInt(cleanedText, 10);
+      if (!isNaN(newValue)) {
+        setQuantity(newValue);
+      }
+    }
+  };
+
+  const handleQuantityIncrement = () => {
+    setQuantity(prev => prev + 1);
+  };
+
+  const handleQuantityDecrement = () => {
+    setQuantity(prev => Math.max(0, prev - 1));
   };
 
   const handleSave = () => {
@@ -68,9 +87,8 @@ export default function InventoryModal({
 
     const newItem: Item = {
       name: name.trim(),
-      icon: '📦',
       category,
-      quantity: Number(quantity) || 0,
+      quantity: quantity,
       unit: unit.trim(),
       averagePrice: averagePrice ? Number(averagePrice) : undefined,
       sellPrice: sellPrice ? Number(sellPrice) : undefined,
@@ -104,13 +122,29 @@ export default function InventoryModal({
             onChangeText={setName}
           />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Quantity"
-            value={quantity}
-            onChangeText={setQuantity}
-            keyboardType="numeric"
-          />
+          <View style={styles.quantityContainer}>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={handleQuantityDecrement}
+            >
+              <Text style={styles.quantityButtonText}>-</Text>
+            </TouchableOpacity>
+            
+            <TextInput
+              style={styles.quantityInput}
+              value={quantity.toString()}
+              onChangeText={handleQuantityChange}
+              keyboardType="numeric"
+              textAlign="center"
+            />
+            
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={handleQuantityIncrement}
+            >
+              <Text style={styles.quantityButtonText}>+</Text>
+            </TouchableOpacity>
+          </View>
 
           <TextInput
             style={styles.input}
@@ -190,6 +224,34 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
     fontSize: 16,
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    justifyContent: 'space-between',
+  },
+  quantityButton: {
+    backgroundColor: '#f0f0f0',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quantityButtonText: {
+    fontSize: 24,
+    color: '#121212',
+  },
+  quantityInput: {
+    flex: 1,
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    marginHorizontal: 10,
+    fontSize: 16,
+    textAlign: 'center',
   },
   buttonContainer: {
     flexDirection: 'row',

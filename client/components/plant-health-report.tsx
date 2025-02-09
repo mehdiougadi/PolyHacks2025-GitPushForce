@@ -3,46 +3,55 @@ import { Colors } from "@client/constants/Colors";
 import { useColorScheme } from 'react-native';
 
 interface Disease {
-    name: string;
-    probability: number;
-    disease_description: string;
-  }
-  
-interface HealthAssessment {
-    diseases: Disease[];
-  }
-  
-interface PlantHealthReportProps {
-    result: {
-      health_assessment?: HealthAssessment;
-    };
-    onRetake: () => void;
-  }
+  name: string;
+  probability: number;
+  disease_description: string;
+}
 
-  export default function PlantHealthReport({ result, onRetake }: PlantHealthReportProps) {
+interface HealthAssessment {
+  diseases: Disease[];
+}
+
+interface PlantHealthReportProps {
+  result: {
+    health_assessment?: HealthAssessment;
+  };
+  onRetake: () => void;
+}
+
+export default function PlantHealthReport({ result, onRetake }: PlantHealthReportProps) {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+
+  // Extract the diseases array, defaulting to an empty array if not available
+  const diseases = result?.health_assessment?.diseases || [];
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.title, { color: colors.text }]}>Health Report</Text>
       
-      {result.health_assessment?.diseases.map((disease, index) => (
-        <View 
-          key={index} 
-          style={[styles.diseaseContainer, { backgroundColor: colors.lightBackground }]}
-        >
-          <Text style={[styles.diseaseName, { color: colors.text }]}>
-            {disease.name}
-          </Text>
-          <Text style={[styles.probability, { color: colors.tint }]}>
-            Probability: {(disease.probability * 100).toFixed(1)}%
-          </Text>
-          <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {disease.disease_description}
-          </Text>
-        </View>
-      ))}
+      {diseases.length > 0 ? (
+        diseases.map((disease, index) => (
+          <View 
+            key={index} 
+            style={[styles.diseaseContainer, { backgroundColor: colors.lightBackground }]}
+          >
+            <Text style={[styles.diseaseName, { color: colors.text }]}>
+              {disease.name}
+            </Text>
+            <Text style={[styles.probability, { color: colors.tint }]}>
+              Probability: {(disease.probability * 100).toFixed(1)}%
+            </Text>
+            <Text style={[styles.description, { color: colors.textSecondary }]}>
+              {disease.disease_description}
+            </Text>
+          </View>
+        ))
+      ) : (
+        <Text style={[styles.noDataText, { color: colors.text }]}>
+          No health records available.
+        </Text>
+      )}
       
       <Button 
         title="Retake Photo" 
@@ -82,5 +91,10 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
     marginTop: 4,
+  },
+  noDataText: {
+    fontSize: 16,
+    fontStyle: 'italic',
+    marginBottom: 12,
   },
 });

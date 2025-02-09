@@ -16,6 +16,9 @@ export default function AppLayout() {
       <Tabs.Screen 
         name="inventory" 
       />
+      <Tabs.Screen 
+        name="weather/index" 
+      />
     </Tabs>
   );
 }

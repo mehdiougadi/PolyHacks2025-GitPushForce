@@ -11,6 +11,12 @@ const features: Feature[] = [
         icon: require("@client/assets/icons/features/weither-logo.png"),
         route: "/(app)/inventory",
     },
+    {
+        name: "Weather",
+        icon: require("@client/assets/icons/features/weither-logo.png"),
+        route: "/(app)/weather",
+    },
+    
 ];
 
 export default features;

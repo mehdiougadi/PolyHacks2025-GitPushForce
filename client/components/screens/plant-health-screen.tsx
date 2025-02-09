@@ -31,13 +31,15 @@ export default function PlantHealthScreen() {
   const analyzePhoto = async (uri: string) => {
     setLoading(true);
     try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      
+      // Create form data with proper file structure
       const formData = new FormData();
-      formData.append('images', blob as any);
+      formData.append('images', {
+        uri,
+        type: 'image/jpeg',  // or 'image/png'
+        name: 'plant_photo.jpg',
+      } as any);
       formData.append('key', PLANT_ID_API_KEY);
-
+  
       const apiResponse = await fetch('https://plant.id/api/v3/health_assessment', {
         method: 'POST',
         body: formData,
@@ -45,7 +47,9 @@ export default function PlantHealthScreen() {
           'Content-Type': 'multipart/form-data',
         },
       });
-
+  
+      if (!apiResponse.ok) throw new Error(`HTTP error! status: ${apiResponse.status}`);
+      
       const data = await apiResponse.json();
       setResult(data);
     } catch (error) {

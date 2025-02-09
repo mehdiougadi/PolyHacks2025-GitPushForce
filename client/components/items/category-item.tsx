@@ -37,10 +37,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     margin: 8,
+    width: 150,
+    height: 200,
   },
   icon: {
-    height: 125,
-    width: 125,
+    height: 100,
+    width: 100,
     borderRadius: 12,
   },
   name: {

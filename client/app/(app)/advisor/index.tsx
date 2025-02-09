@@ -11,7 +11,7 @@ export default function AdvisorScreen(){
 
     const handleBack = () => {
         router.back();
-        };
+    };
 
     return (
         <DefaultScreen>

@@ -38,17 +38,19 @@ export default function PlantHealthScreen() {
         type: 'image/jpeg',  // or 'image/png'
         name: 'plant_photo.jpg',
       } as any);
-      formData.append('key', PLANT_ID_API_KEY);
   
       const apiResponse = await fetch('https://plant.id/api/v3/health_assessment', {
         method: 'POST',
         body: formData,
         headers: {
           'Content-Type': 'multipart/form-data',
+          'Api-Key': PLANT_ID_API_KEY,
         },
       });
   
-      if (!apiResponse.ok) throw new Error(`HTTP error! status: ${apiResponse.status}`);
+      if (!apiResponse.ok) {
+        throw new Error(`HTTP error! status: ${apiResponse.status}`);
+      }
       
       const data = await apiResponse.json();
       setResult(data);

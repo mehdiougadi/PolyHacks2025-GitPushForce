@@ -1,7 +1,7 @@
-import { View, Text, FlatList, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import React, { useState } from 'react';
 import Item from '@common/interfaces/item';
-import { useSegments, Link, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from '@client/contexts/auth-context';
 import InventoryModal from '@client/components/modals/item-modal';
 import { useMessage } from '@client/contexts/message-context';
@@ -15,6 +15,7 @@ export default function UserItemsScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | undefined>();
   const { showMessage } = useMessage();
+  const router = useRouter();
 
   const updateFirestore = async (updatedItems: Item[]) => {
     if (!user) return;
@@ -82,6 +83,13 @@ export default function UserItemsScreen() {
     }
   };
 
+  const handleViewData = (itemName: string) => {
+    router.push({
+      pathname: `/inventory/${itemName}/data` as any,
+      params: { category }
+    });
+  };
+
   const renderItem = ({ item }: { item: Item }) => (
     <View style={styles.item}>
       <View style={styles.itemContent}>
@@ -95,19 +103,24 @@ export default function UserItemsScreen() {
         )}
       </View>
       <View style={styles.buttonContainer}>
-        <Link href={`/inventory/${item.name}/data`} asChild>
-          <Button title="View Data" color={'#3d3d3d'} />
-        </Link>
-        <Button
-          title="Edit"
+        <TouchableOpacity 
+          onPress={() => handleViewData(item.name)}
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>View Data</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
           onPress={() => handleEditItem(item)}
-          color="#121212"
-        />
-        <Button
-          title="Delete"
+          style={styles.button}
+        >
+          <Text style={styles.buttonText}>Edit</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
           onPress={() => handleDeleteItem(item.name)}
-          color="#dc3545"
-        />
+          style={[styles.button, styles.deleteButton]}
+        >
+          <Text style={styles.buttonText}>Delete</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -115,7 +128,7 @@ export default function UserItemsScreen() {
   const filteredItems = (user?.items || []).filter((item) => item.category.toLowerCase() === category.toLowerCase());
 
   return (
-    <SafeAreaView style={{flex: 1}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#FFF'}}>
       <View style={styles.container}>
         {filteredItems.length === 0 ? (
           <View style={styles.emptyState}>
@@ -151,7 +164,6 @@ export default function UserItemsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   list: {
     padding: 16,
@@ -162,11 +174,13 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 4,
   },
   itemContent: {
     marginBottom: 10,
@@ -190,6 +204,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     gap: 10,
+  },
+  button: {
+    backgroundColor: '#121212',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 6,
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  deleteButton: {
+    backgroundColor: '#dc3545',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
   },
   bottomButton: {
     position: 'absolute',

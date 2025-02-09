@@ -3,16 +3,17 @@ import { DataScreen } from '@client/components/screens/data-screen';
 import { parsePriceData, parseQuantityData } from '@client/utils/data-parser';
 
 export default function ItemDataScreen() {
-  const { item } = useLocalSearchParams();
+  const { item, category } = useLocalSearchParams();
   
   const prices = parsePriceData(item as string);
   const quantities = parseQuantityData(item as string);
-
+  
   return (
-    <DataScreen 
+    <DataScreen
       itemName={item as string}
       prices={prices}
       quantities={quantities}
+      category={category as string}
     />
   );
 }

@@ -1,21 +1,21 @@
-import { Stack } from 'expo-router';
+import { Tabs } from 'expo-router';
 
 export default function InventoryLayout() {
   return (
-    <Stack>
-      <Stack.Screen 
+    <Tabs 
+      screenOptions={{ 
+      headerShown: false,
+      tabBarStyle: { display: 'none' }  }}
+    >
+      <Tabs.Screen 
         name="index" 
       />
-      <Stack.Screen 
+      <Tabs.Screen 
         name="items" 
       />
-      <Stack.Screen 
+      <Tabs.Screen 
         name="[item]/data" 
-        options={{ 
-          title: 'Item Data',
-          presentation: 'modal' 
-        }} 
       />
-    </Stack>
+    </Tabs>
   );
 }

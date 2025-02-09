@@ -7,7 +7,7 @@ export default function CategoryItem({ category }: { category: Category }) {
 
   const handlePress = () => {
     router.navigate({
-      pathname: `/(app)/inventory/item` as any,
+      pathname: `/(app)/inventory/items` as any,
       params: { category: category.name.toLowerCase()},
     });
   };

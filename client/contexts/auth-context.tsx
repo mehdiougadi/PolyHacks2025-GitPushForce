@@ -94,7 +94,6 @@ function AuthContextProvider({ children }: AuthContextProps) {
                 setIsAuthenticated(false);
             }
         } catch (error) {
-            console.log("Error", error);
             setIsAuthenticated(false);
         } finally {
             setIsLoading(false);

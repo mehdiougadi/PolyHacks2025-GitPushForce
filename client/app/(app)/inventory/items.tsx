@@ -1,7 +1,7 @@
 import { View, Text, FlatList, Button, StyleSheet } from 'react-native';
 import React, { useState } from 'react';
 import Item from '@common/interfaces/item';
-import { useSegments, Link } from "expo-router";
+import { useSegments, Link, useLocalSearchParams } from "expo-router";
 import { useAuth } from '@client/contexts/auth-context';
 import InventoryModal from '@client/components/modals/item-modal';
 import { useMessage } from '@client/contexts/message-context';
@@ -10,9 +10,8 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@client/firebase';
 
 export default function UserItemsScreen() {
-  const segments = useSegments();
-  const category = segments[segments.length - 1]?.replace(/[\[\]]/g, '').trim() || '';
-  console.log(category);
+  const { category } = useLocalSearchParams();  
+  console.log(category); 
   const { user, updateUser } = useAuth();
   const [modalVisible, setModalVisible] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | undefined>();

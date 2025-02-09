@@ -1,6 +1,9 @@
 import { Camera } from 'expo-camera';
 import { useState, useRef } from 'react';
 import { Button, View, Image, ActivityIndicator } from 'react-native';
+import { PLANT_ID_API_KEY } from "@client/constants/api-key";
+import PlantHealthReport from '@client/components/plant-health-report';
+
 
 export default function PlantHealthScreen() {
   const [hasPermission, setHasPermission] = useState<boolean | null>(null);

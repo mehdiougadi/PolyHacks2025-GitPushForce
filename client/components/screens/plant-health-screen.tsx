@@ -38,7 +38,7 @@ export default function PlantHealthScreen() {
       formData.append('images', blob as any);
       formData.append('key', PLANT_ID_API_KEY);
 
-      const apiResponse = await fetch('https://api.plant.id/v2/health_assessment', {
+      const apiResponse = await fetch('https://plant.id/api/v3/health_assessment', {
         method: 'POST',
         body: formData,
         headers: {

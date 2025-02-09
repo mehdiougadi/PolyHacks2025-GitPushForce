@@ -5,11 +5,9 @@ export default function InventoryLayout() {
     <Stack>
       <Stack.Screen 
         name="index" 
-        options={{ title: 'Inventory Categories' }} 
       />
       <Stack.Screen 
-        name="[category]" 
-        options={{ title: 'Category Items' }} 
+        name="items" 
       />
       <Stack.Screen 
         name="[item]/data" 

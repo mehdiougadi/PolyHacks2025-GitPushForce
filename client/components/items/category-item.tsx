@@ -6,10 +6,9 @@ export default function CategoryItem({ category }: { category: Category }) {
   const router = useRouter();
 
   const handlePress = () => {
-    const sanitizedCategory = category.name.toLowerCase().replace(/[\[\]]/g, '').trim();
     router.navigate({
-      pathname: `/(app)/inventory/user` as any,
-
+      pathname: `/(app)/inventory/item` as any,
+      params: { category: category.name.toLowerCase()},
     });
   };
 

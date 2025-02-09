@@ -10,15 +10,20 @@ import {
 } from 'react-native';
 import {
   VictoryChart,
-  VictoryLine,
+  VictoryArea,
   VictoryAxis,
   VictoryTheme,
   VictoryTooltip,
-  VictoryVoronoiContainer,
+  createContainer,
 } from 'victory-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import DropDownPicker from 'react-native-dropdown-picker';
 import { Colors } from '../../constants/Colors';
+import { Defs, LinearGradient,Stop } from 'react-native-svg';
+
+// Create combined container for zoom and tooltips
+const VictoryZoomVoronoiContainer = createContainer('voronoi', 'zoom');
 
 interface DataScreenProps {
   itemName: string;
@@ -29,14 +34,22 @@ interface DataScreenProps {
 
 export const DataScreen = ({ itemName, prices, quantities, category }: DataScreenProps) => {
   const { width } = useWindowDimensions();
-  const chartWidth = width - 32; // subtract side margins
+  const chartWidth = width - 32;
   const isWeb = Platform.OS === 'web';
   const adjustedChartWidth = isWeb ? chartWidth * 0.95 : chartWidth;
 
   const [displayType, setDisplayType] = useState<'price' | 'quantity'>('price');
-  const [timeRange, setTimeRange] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
-  const [chartHeight, setChartHeight] = useState<number>(300); // initial fallback height
+  const [chartHeight, setChartHeight] = useState(300);
   const router = useRouter();
+
+  // Dropdown state
+  const [open, setOpen] = useState(false);
+  const [timeRange, setTimeRange] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
+  const [items] = useState([
+    { label: 'Monthly', value: 'monthly' },
+    { label: 'Quarterly', value: 'quarterly' },
+    { label: 'Yearly', value: 'yearly' },
+  ]);
 
   const handleBack = () => {
     router.navigate({
@@ -47,6 +60,27 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
 
   const getData = () => (displayType === 'price' ? prices : quantities);
 
+  // Aggregate data by month
+  const aggregateData = (data: { date: Date; value: number }[]) => {
+    const monthlyData = data.reduce((acc, item) => {
+      const date = new Date(item.date);
+      const monthKey = new Date(date.getFullYear(), date.getMonth(), 1).getTime();
+      
+      if (!acc[monthKey]) {
+        acc[monthKey] = { total: 0, count: 0, date: new Date(monthKey) };
+      }
+      acc[monthKey].total += item.value;
+      acc[monthKey].count++;
+      return acc;
+    }, {} as Record<number, { total: number; count: number; date: Date }>);
+
+    return Object.values(monthlyData).map(({ total, count, date }) => ({
+      date,
+      value: total / count,
+    }));
+  };
+
+  // Filter aggregated data based on time range
   const filterData = (data: { date: Date; value: number }[]) => {
     const now = new Date();
     const cutoffDate = new Date(now);
@@ -62,27 +96,13 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
         cutoffDate.setFullYear(now.getFullYear() - 1);
         break;
     }
-    return data.filter((d) => new Date(d.date) > cutoffDate);
+
+    return data.filter((d) => new Date(d.date) >= cutoffDate);
   };
 
-  const TimeRangeButton = ({ title, value }: { title: string; value: typeof timeRange }) => (
-    <Pressable
-      style={[
-        styles.timeRangeButton,
-        timeRange === value && styles.timeRangeButtonActive,
-      ]}
-      onPress={() => setTimeRange(value)}
-    >
-      <Text
-        style={[
-          styles.timeRangeButtonText,
-          timeRange === value && styles.timeRangeButtonTextActive,
-        ]}
-      >
-        {title}
-      </Text>
-    </Pressable>
-  );
+  const processedData = filterData(aggregateData(getData()));
+  const maxValue = Math.max(...processedData.map(d => d.value), 0);
+  const yDomain = [0, maxValue * 1.2];
 
   const DisplayTypeButton = ({ title, value }: { title: string; value: typeof displayType }) => (
     <Pressable
@@ -103,15 +123,8 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
     </Pressable>
   );
 
-  const filteredData = filterData(getData());
-
   return (
-    <SafeAreaView
-    style={[
-      styles.container,
-      isWeb && StyleSheet.absoluteFill, // Take up the full height of the screen
-    ]}
-    >
+    <SafeAreaView style={[styles.container, isWeb && StyleSheet.absoluteFill]}>
       <View style={styles.header}>
         <Pressable onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={Colors.light.tint} />
@@ -124,32 +137,39 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
         <DisplayTypeButton title="Quantity" value="quantity" />
       </View>
 
-      <View style={styles.timeRangeContainer}>
-        <TimeRangeButton title="1M" value="monthly" />
-        <TimeRangeButton title="3M" value="quarterly" />
-        <TimeRangeButton title="1Y" value="yearly" />
+      <View style={styles.dropdownContainer}>
+        <DropDownPicker
+          open={open}
+          value={timeRange}
+          items={items}
+          setOpen={setOpen}
+          setValue={setTimeRange}
+          style={styles.dropdown}
+          dropDownContainerStyle={styles.dropdownList}
+          labelStyle={styles.dropdownLabel}
+          zIndex={3000}
+          zIndexInverse={1000}
+        />
       </View>
 
-      {/* Chart container that expands to fill available space */}
       <View
         style={styles.chartContainer}
-        onLayout={(event) => {
-          const { height } = event.nativeEvent.layout;
-          setChartHeight(height);
-        }}
+        onLayout={(event) => setChartHeight(event.nativeEvent.layout.height)}
       >
         <VictoryChart
           width={adjustedChartWidth}
           height={chartHeight}
           theme={VictoryTheme.material}
           padding={{ top: 20, bottom: 50, left: 60, right: 20 }}
+          domain={{ y: yDomain }}
           containerComponent={
-            <VictoryVoronoiContainer
+            <VictoryZoomVoronoiContainer
               voronoiDimension="x"
               labels={({ datum }) =>
-                `${new Date(datum.date).toLocaleDateString()}\n${
-                  displayType === 'price' ? '$' : ''
-                }${datum.value.toFixed(2)}${
+                `${new Date(datum.date).toLocaleDateString('en-US', {
+                  month: 'short',
+                  year: 'numeric',
+                })}\n${displayType === 'price' ? '$' : ''}${datum.value.toFixed(2)}${
                   displayType === 'quantity' ? ' units' : ''
                 }`
               }
@@ -163,33 +183,48 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
                   }}
                 />
               }
+              zoomDimension="x"
+              allowZoom={false}
             />
           }
         >
+          <defs>
+            <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={Colors.light.tint} stopOpacity={0.4} />
+              <stop offset="100%" stopColor={Colors.light.tint} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+
           <VictoryAxis
-            tickFormat={(x: number) =>
-              new Date(x).toLocaleDateString('en-US', {
-                month: 'short',
-                day: timeRange === 'yearly' ? undefined : 'numeric',
-              })
+            tickFormat={(x) =>
+              new Date(x).toLocaleDateString('en-US', { month: 'short' })
             }
             style={{
               tickLabels: { angle: -45, fontSize: 10, padding: 15 },
+              grid: { stroke: '#e0e0e0', strokeWidth: 0.5 },
             }}
           />
+
           <VictoryAxis
             dependentAxis
             label={displayType === 'price' ? 'Price ($)' : 'Quantity'}
             style={{
               axisLabel: { padding: 35 },
+              grid: { stroke: '#e0e0e0', strokeWidth: 0.5 },
             }}
           />
-          <VictoryLine
-            data={filteredData}
+
+          <VictoryArea
+            data={processedData}
             x="date"
             y="value"
+            interpolation="natural"
             style={{
-              data: { stroke: Colors.light.tint, strokeWidth: 2 },
+              data: {
+                fill: 'url(#areaGradient)',
+                stroke: Colors.light.tint,
+                strokeWidth: 2,
+              },
             }}
             animate={{
               duration: 300,
@@ -204,8 +239,8 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
           <Text style={styles.statLabel}>Average</Text>
           <Text style={styles.statValue}>
             {displayType === 'price' ? '$' : ''}
-            {filteredData.length > 0
-              ? (filteredData.reduce((sum, item) => sum + item.value, 0) / filteredData.length).toFixed(2)
+            {processedData.length > 0
+              ? (processedData.reduce((sum, item) => sum + item.value, 0) / processedData.length).toFixed(2)
               : 'N/A'}
             {displayType === 'quantity' ? ' units' : ''}
           </Text>
@@ -213,31 +248,28 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
 
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>
-            {displayType === 'price' ? 'Lowest Price' : 'Min Quantity'}
+            {displayType === 'price' ? 'Lowest' : 'Min'}
           </Text>
           <Text style={styles.statValue}>
             {displayType === 'price' ? '$' : ''}
-            {filteredData.length > 0
-              ? Math.min(...filteredData.map(item => item.value)).toFixed(2)
+            {processedData.length > 0
+              ? Math.min(...processedData.map(item => item.value)).toFixed(2)
               : 'N/A'}
-            {displayType === 'quantity' ? ' units' : ''}
           </Text>
         </View>
 
         <View style={styles.statBox}>
           <Text style={styles.statLabel}>
-            {displayType === 'price' ? 'Highest Price' : 'Max Quantity'}
+            {displayType === 'price' ? 'Highest' : 'Max'}
           </Text>
           <Text style={styles.statValue}>
             {displayType === 'price' ? '$' : ''}
-            {filteredData.length > 0
-              ? Math.max(...filteredData.map(item => item.value)).toFixed(2)
+            {processedData.length > 0
+              ? Math.max(...processedData.map(item => item.value)).toFixed(2)
               : 'N/A'}
-            {displayType === 'quantity' ? ' units' : ''}
           </Text>
         </View>
       </View>
-
     </SafeAreaView>
   );
 };
@@ -287,30 +319,21 @@ const styles = StyleSheet.create({
   displayTypeButtonTextActive: {
     color: 'white',
   },
-  timeRangeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    paddingBottom: 16,
+  dropdownContainer: {
+    paddingHorizontal: 16,
+    zIndex: 1000,
   },
-  timeRangeButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: '#f5f5f5',
-    minWidth: 60,
-    alignItems: 'center',
+  dropdown: {
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
   },
-  timeRangeButtonActive: {
-    backgroundColor: Colors.light.tint,
+  dropdownList: {
+    borderColor: '#e0e0e0',
+    marginTop: 4,
   },
-  timeRangeButtonText: {
-    color: '#666',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  timeRangeButtonTextActive: {
-    color: 'white',
+  dropdownLabel: {
+    color: '#333',
+    fontSize: 14,
   },
   chartContainer: {
     flex: 1,

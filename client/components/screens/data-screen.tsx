@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  Pressable, 
-  SafeAreaView, 
-  useWindowDimensions, 
-  Platform 
+import {
+  View,
+  Text,
+  StyleSheet,
+  Pressable,
+  SafeAreaView,
+  useWindowDimensions,
+  Platform,
 } from 'react-native';
-import { 
-  VictoryChart, 
-  VictoryLine, 
-  VictoryAxis, 
-  VictoryTheme, 
-  VictoryTooltip, 
-  VictoryVoronoiContainer 
+import {
+  VictoryChart,
+  VictoryLine,
+  VictoryAxis,
+  VictoryTheme,
+  VictoryTooltip,
+  VictoryVoronoiContainer,
 } from 'victory-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -28,14 +28,14 @@ interface DataScreenProps {
 }
 
 export const DataScreen = ({ itemName, prices, quantities, category }: DataScreenProps) => {
-  // Call the hook inside your component!
   const { width } = useWindowDimensions();
-  const chartWidth = width - 32; // Adjust for margins/padding as needed
+  const chartWidth = width - 32; // subtract side margins
   const isWeb = Platform.OS === 'web';
   const adjustedChartWidth = isWeb ? chartWidth * 0.95 : chartWidth;
 
   const [displayType, setDisplayType] = useState<'price' | 'quantity'>('price');
   const [timeRange, setTimeRange] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
+  const [chartHeight, setChartHeight] = useState<number>(300); // initial fallback height
   const router = useRouter();
 
   const handleBack = () => {
@@ -50,7 +50,7 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
   const filterData = (data: { date: Date; value: number }[]) => {
     const now = new Date();
     const cutoffDate = new Date(now);
-    
+
     switch (timeRange) {
       case 'monthly':
         cutoffDate.setMonth(now.getMonth() - 1);
@@ -62,8 +62,7 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
         cutoffDate.setFullYear(now.getFullYear() - 1);
         break;
     }
-    
-    return data.filter(d => new Date(d.date) > cutoffDate);
+    return data.filter((d) => new Date(d.date) > cutoffDate);
   };
 
   const TimeRangeButton = ({ title, value }: { title: string; value: typeof timeRange }) => (
@@ -107,7 +106,12 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
   const filteredData = filterData(getData());
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+    style={[
+      styles.container,
+      isWeb && StyleSheet.absoluteFill, // Take up the full height of the screen
+    ]}
+    >
       <View style={styles.header}>
         <Pressable onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={Colors.light.tint} />
@@ -126,10 +130,17 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
         <TimeRangeButton title="1Y" value="yearly" />
       </View>
 
-      <View style={styles.chartContainer}>
+      {/* Chart container that expands to fill available space */}
+      <View
+        style={styles.chartContainer}
+        onLayout={(event) => {
+          const { height } = event.nativeEvent.layout;
+          setChartHeight(height);
+        }}
+      >
         <VictoryChart
           width={adjustedChartWidth}
-          height={300} 
+          height={chartHeight}
           theme={VictoryTheme.material}
           padding={{ top: 20, bottom: 50, left: 60, right: 20 }}
           containerComponent={
@@ -193,8 +204,10 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
           <Text style={styles.statLabel}>Average</Text>
           <Text style={styles.statValue}>
             {displayType === 'price' ? '$' : ''}
-            {(filteredData.reduce((sum, item) => sum + item.value, 0) /
-              filteredData.length).toFixed(2)}
+            {(
+              filteredData.reduce((sum, item) => sum + item.value, 0) /
+              filteredData.length
+            ).toFixed(2)}
             {displayType === 'quantity' ? ' units' : ''}
           </Text>
         </View>
@@ -204,7 +217,7 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
           </Text>
           <Text style={styles.statValue}>
             {displayType === 'price' ? '$' : ''}
-            {Math.max(...filteredData.map(item => item.value)).toFixed(2)}
+            {Math.max(...filteredData.map((item) => item.value)).toFixed(2)}
             {displayType === 'quantity' ? ' units' : ''}
           </Text>
         </View>

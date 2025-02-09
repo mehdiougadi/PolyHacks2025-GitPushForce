@@ -87,7 +87,6 @@ export default function PlantHealthScreen() {
         <CameraView 
           style={styles.camera} 
           ref={cameraRef}
-          type="back"
         />
       )}
       

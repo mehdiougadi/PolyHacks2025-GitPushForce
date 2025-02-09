@@ -77,7 +77,6 @@ export default function PlantHealthScreen() {
         throw new Error('Unexpected API response format');
       }
     } catch (error) {
-      console.error('Analysis error:', error);
     } finally {
       setLoading(false);
     }

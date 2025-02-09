@@ -97,7 +97,6 @@ export default function ChatBot() {
         timestamp: new Date()
       }]);
     } catch (error) {
-      console.error("Error calling ChatGPT API:", error);
       setChatLog(prev => [...prev, { 
         sender: 'bot', 
         text: "Sorry, something went wrong.",

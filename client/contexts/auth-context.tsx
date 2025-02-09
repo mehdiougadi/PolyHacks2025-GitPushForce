@@ -58,7 +58,6 @@ function AuthContextProvider({ children }: AuthContextProps) {
                     setUser(userData);
                 }
             }, (error) => {
-                console.error("Error listening to user updates:", error);
             });
         }
 
@@ -81,7 +80,6 @@ function AuthContextProvider({ children }: AuthContextProps) {
                     await router.replace('/(auth)/entry');
                 }
             } catch (error) {
-                console.error('Navigation error:', error);
             }
         };
 
@@ -154,7 +152,6 @@ function AuthContextProvider({ children }: AuthContextProps) {
                 setIsAuthenticated(true);
             }
         } catch (error) {
-            console.error('Sign up error:', error);
             throw error;
         } finally {
             setIsLoading(false);
@@ -181,7 +178,6 @@ function AuthContextProvider({ children }: AuthContextProps) {
                 setIsAuthenticated(true);
             }
         } catch (error) {
-            console.error('Sign in error:', error);
             throw error;
         } finally {
             setIsLoading(false);
@@ -197,7 +193,6 @@ function AuthContextProvider({ children }: AuthContextProps) {
             setIsAuthenticated(false);
             await router.replace('/(auth)/entry');
         } catch (error) {
-            console.error('Sign out error:', error);
             throw error;
         } finally {
             setIsLoading(false);

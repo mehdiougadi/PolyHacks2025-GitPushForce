@@ -50,7 +50,6 @@ export default function TodoScreen(): JSX.Element {
         setIsLoading(false);
       },
       (error) => {
-        console.error("Error fetching tasks: ", error);
         setIsLoading(false);
       }
     );
@@ -70,7 +69,6 @@ export default function TodoScreen(): JSX.Element {
         });
         setTask("");
       } catch (error) {
-        console.error("Error adding task: ", error);
       }
     }
   };
@@ -80,7 +78,6 @@ export default function TodoScreen(): JSX.Element {
       try {
         await deleteDoc(doc(db, "users", user.uid, "todos", id));
       } catch (error) {
-        console.error("Error removing task: ", error);
       }
     }
   };

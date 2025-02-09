@@ -7,18 +7,13 @@ import {
   SafeAreaView,
   useWindowDimensions,
   Platform,
+  ScrollView,
 } from 'react-native';
-import {
-  VictoryChart,
-  VictoryLine,
-  VictoryAxis,
-  VictoryTheme,
-  VictoryTooltip,
-  VictoryVoronoiContainer,
-} from 'victory-native';
+import { LineChart } from 'react-native-chart-kit';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../../constants/Colors';
+import SansitaText from '../texts/sansita-text';
 
 interface DataScreenProps {
   itemName: string;
@@ -29,13 +24,12 @@ interface DataScreenProps {
 
 export const DataScreen = ({ itemName, prices, quantities, category }: DataScreenProps) => {
   const { width } = useWindowDimensions();
-  const chartWidth = width - 32; // subtract side margins
+  const chartWidth = width - 32;
   const isWeb = Platform.OS === 'web';
   const adjustedChartWidth = isWeb ? chartWidth * 0.95 : chartWidth;
 
   const [displayType, setDisplayType] = useState<'price' | 'quantity'>('price');
-  const [timeRange, setTimeRange] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
-  const [chartHeight, setChartHeight] = useState<number>(300); // initial fallback height
+  const [timeRange, setTimeRange] = useState<'month' | 'threeMonths' | 'sixMonths'>('month');
   const router = useRouter();
 
   const handleBack = () => {
@@ -52,179 +46,102 @@ export const DataScreen = ({ itemName, prices, quantities, category }: DataScree
     const cutoffDate = new Date(now);
 
     switch (timeRange) {
-      case 'monthly':
+      case 'month':
         cutoffDate.setMonth(now.getMonth() - 1);
         break;
-      case 'quarterly':
+      case 'threeMonths':
         cutoffDate.setMonth(now.getMonth() - 3);
         break;
-      case 'yearly':
-        cutoffDate.setFullYear(now.getFullYear() - 1);
+      case 'sixMonths':
+        cutoffDate.setMonth(now.getMonth() - 6);
         break;
     }
     return data.filter((d) => new Date(d.date) > cutoffDate);
   };
 
+  const filteredData = filterData(getData());
+  const averagePrice = (filteredData.reduce((sum, item) => sum + item.value, 0) / filteredData.length).toFixed(2);
+  const highestPrice = Math.max(...filteredData.map((item) => item.value)).toFixed(2);
+
   const TimeRangeButton = ({ title, value }: { title: string; value: typeof timeRange }) => (
     <Pressable
-      style={[
+      style={({ pressed }) => [
         styles.timeRangeButton,
         timeRange === value && styles.timeRangeButtonActive,
+        pressed && { opacity: 0.7 },
       ]}
-      onPress={() => setTimeRange(value)}
+      onPress={() => {
+        setTimeRange(value);
+      }}
     >
-      <Text
-        style={[
-          styles.timeRangeButtonText,
-          timeRange === value && styles.timeRangeButtonTextActive,
-        ]}
-      >
+      <Text style={[styles.timeRangeButtonText, timeRange === value && styles.timeRangeButtonTextActive]}>
         {title}
       </Text>
     </Pressable>
   );
-
-  const DisplayTypeButton = ({ title, value }: { title: string; value: typeof displayType }) => (
-    <Pressable
-      style={[
-        styles.displayTypeButton,
-        displayType === value && styles.displayTypeButtonActive,
-      ]}
-      onPress={() => setDisplayType(value)}
-    >
-      <Text
-        style={[
-          styles.displayTypeButtonText,
-          displayType === value && styles.displayTypeButtonTextActive,
-        ]}
-      >
-        {title}
-      </Text>
-    </Pressable>
-  );
-
-  const filteredData = filterData(getData());
-
+  
   return (
-    <SafeAreaView
-    style={[
-      styles.container,
-      isWeb && StyleSheet.absoluteFill, // Take up the full height of the screen
-    ]}
-    >
+    <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Pressable onPress={handleBack} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={Colors.light.tint} />
         </Pressable>
         <Text style={styles.title}>{itemName}</Text>
       </View>
-
-      <View style={styles.displayTypeContainer}>
-        <DisplayTypeButton title="Price" value="price" />
-        <DisplayTypeButton title="Quantity" value="quantity" />
-      </View>
-
       <View style={styles.timeRangeContainer}>
-        <TimeRangeButton title="1M" value="monthly" />
-        <TimeRangeButton title="3M" value="quarterly" />
-        <TimeRangeButton title="1Y" value="yearly" />
+        <TimeRangeButton title="1M" value="month" />
+        <TimeRangeButton title="3M" value="threeMonths" />
+        <TimeRangeButton title="6M" value="sixMonths" />
       </View>
-
-      {/* Chart container that expands to fill available space */}
-      <View
-        style={styles.chartContainer}
-        onLayout={(event) => {
-          const { height } = event.nativeEvent.layout;
-          setChartHeight(height);
-        }}
-      >
-        <VictoryChart
-          width={adjustedChartWidth}
-          height={chartHeight}
-          theme={VictoryTheme.material}
-          padding={{ top: 20, bottom: 50, left: 60, right: 20 }}
-          containerComponent={
-            <VictoryVoronoiContainer
-              voronoiDimension="x"
-              labels={({ datum }) =>
-                `${new Date(datum.date).toLocaleDateString()}\n${
-                  displayType === 'price' ? '$' : ''
-                }${datum.value.toFixed(2)}${
-                  displayType === 'quantity' ? ' units' : ''
-                }`
-              }
-              labelComponent={
-                <VictoryTooltip
-                  cornerRadius={5}
-                  flyoutStyle={{
-                    fill: 'white',
-                    stroke: Colors.light.tint,
-                    strokeWidth: 1,
-                  }}
-                />
-              }
-            />
-          }
-        >
-          <VictoryAxis
-            tickFormat={(x: number) =>
-              new Date(x).toLocaleDateString('en-US', {
-                month: 'short',
-                day: timeRange === 'yearly' ? undefined : 'numeric',
-              })
-            }
-            style={{
-              tickLabels: { angle: -45, fontSize: 10, padding: 15 },
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.chartContainer}>
+          <View style={{flexDirection: 'row', justifyContent: 'center'}}>
+            <SansitaText text={'Graphical value in the market'} lineHeight='auto' fontSize='16'></SansitaText>
+          </View>
+          <LineChart
+            data={{
+              labels: filteredData.map((d) =>
+                new Date(d.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+              ),
+              datasets: [{
+                data: filteredData.map((d) => d.value),
+                color: () => 'green',
+                strokeWidth: 2,
+              }],
             }}
+            width={adjustedChartWidth}
+            height={300}
+            chartConfig={{
+              backgroundGradientFrom: '#f8f8f8',
+              backgroundGradientTo: '#f8f8f8',
+              color: (opacity = 1) => `rgba(34, 139, 34, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+              propsForDots: {
+                r: '4',
+                strokeWidth: '2',
+                stroke: 'green',
+              },
+            }}
+            bezier
+            style={styles.chart}
           />
-          <VictoryAxis
-            dependentAxis
-            label={displayType === 'price' ? 'Price ($)' : 'Quantity'}
-            style={{
-              axisLabel: { padding: 35 },
-            }}
-          />
-          <VictoryLine
-            data={filteredData}
-            x="date"
-            y="value"
-            style={{
-              data: { stroke: Colors.light.tint, strokeWidth: 2 },
-            }}
-            animate={{
-              duration: 300,
-              onLoad: { duration: 300 },
-            }}
-          />
-        </VictoryChart>
-      </View>
-
-      <View style={styles.statsContainer}>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>Average</Text>
-          <Text style={styles.statValue}>
-            {displayType === 'price' ? '$' : ''}
-            {(
-              filteredData.reduce((sum, item) => sum + item.value, 0) /
-              filteredData.length
-            ).toFixed(2)}
-            {displayType === 'quantity' ? ' units' : ''}
-          </Text>
         </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statLabel}>
-            {displayType === 'price' ? 'Highest Price' : 'Max Quantity'}
-          </Text>
-          <Text style={styles.statValue}>
-            {displayType === 'price' ? '$' : ''}
-            {Math.max(...filteredData.map((item) => item.value)).toFixed(2)}
-            {displayType === 'quantity' ? ' units' : ''}
-          </Text>
+
+        <View style={styles.statsContainer}>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Average Price</Text>
+            <Text style={styles.statValue}>${averagePrice}</Text>
+          </View>
+          <View style={styles.statBox}>
+            <Text style={styles.statLabel}>Highest Price</Text>
+            <Text style={styles.statValue}>${highestPrice}</Text>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -247,79 +164,84 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333',
   },
-  displayTypeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    padding: 16,
-    gap: 12,
-  },
-  displayTypeButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    backgroundColor: '#f5f5f5',
-    minWidth: 100,
-    alignItems: 'center',
-  },
-  displayTypeButtonActive: {
-    backgroundColor: Colors.light.tint,
-  },
-  displayTypeButtonText: {
-    color: '#666',
-    fontWeight: '600',
-  },
-  displayTypeButtonTextActive: {
-    color: 'white',
-  },
   timeRangeContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 8,
-    paddingBottom: 16,
-  },
-  timeRangeButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: '#f5f5f5',
-    minWidth: 60,
-    alignItems: 'center',
-  },
-  timeRangeButtonActive: {
-    backgroundColor: Colors.light.tint,
-  },
-  timeRangeButtonText: {
-    color: '#666',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  timeRangeButtonTextActive: {
-    color: 'white',
-  },
-  chartContainer: {
-    flex: 1,
-    marginHorizontal: -16,
+    paddingVertical: 12,
+    gap: 12,
   },
   statsContainer: {
-    flexDirection: 'row',
-    padding: 16,
+    flexDirection: 'column',
     gap: 16,
+    width:'100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
   },
   statBox: {
-    flex: 1,
     backgroundColor: '#f8f8f8',
-    padding: 16,
+    maxWidth: 600,
+    width: '95%',
+    padding: 20,
     borderRadius: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#eee',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
   },
   statLabel: {
     color: '#666',
-    fontSize: 12,
+    fontSize: 18,
     marginBottom: 4,
   },
   statValue: {
     color: '#333',
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: 'bold',
+  },
+  timeRangeButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: '#f5f5f5',
+    minWidth: 80,
+    alignItems: 'center',
+  },
+  timeRangeButtonActive: {
+    backgroundColor: '#006400',
+  },
+  timeRangeButtonText: {
+    color: '#333',
+    fontSize: 16,
+  },
+  timeRangeButtonTextActive: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+  },
+  scrollContainer: { 
+    paddingBottom: 20 
+  },
+  chartContainer: {
+    backgroundColor: '#f8f8f8',
+    paddingVertical: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#eee',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
+    alignSelf: 'center',
+    marginBottom: 20,
   },
 });

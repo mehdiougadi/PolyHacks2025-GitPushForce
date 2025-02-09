@@ -1,10 +1,10 @@
 import CategoryItem from "@client/components/items/category-item";
-import DefaultScreen from "@client/components/screens/default-screen";
-import { Pressable, StyleSheet, View, Text } from "react-native";
+import { Pressable, StyleSheet, View, Text, ScrollView } from "react-native";
 import categories from "@client/constants/categories";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@client/constants/Colors";
 import { useRouter } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function InventoryScreen(){
     const router = useRouter();
@@ -14,19 +14,21 @@ export default function InventoryScreen(){
       };
 
     return(
-        <DefaultScreen>
+        <SafeAreaView style={{flex: 1, backgroundColor: '#fff'}}>
             <View style={styles.header}>
                 <Pressable onPress={handleBack} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={Colors.light.tint} />
                 </Pressable>
                 <Text style={styles.headerTitle}>Home</Text>
             </View>
-            <View style={styles.container}>
-                {categories.map((category) => (
-                    <CategoryItem key={category.name} category={category} />
-                ))}
-            </View>
-        </DefaultScreen>
+            <ScrollView style={{flex: 1, backgroundColor: '#fff'}} showsVerticalScrollIndicator={false}>
+                <View style={styles.container}>
+                    {categories.map((category) => (
+                        <CategoryItem key={category.name} category={category} />
+                    ))}
+                </View>
+            </ScrollView>
+        </SafeAreaView>
     );
 }
 

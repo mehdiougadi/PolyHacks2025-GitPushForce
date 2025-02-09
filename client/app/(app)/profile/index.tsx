@@ -26,7 +26,7 @@ export default function ProfileScreen() {
                 <Pressable onPress={handleBack} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color={Colors.light.tint} />
                 </Pressable>
-                <Text style={styles.headerTitle}>Profile</Text>
+                <Text style={styles.headerTitle}>Home</Text>
             </View>
             
             <View style={styles.profileContainer}>

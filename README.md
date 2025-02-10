@@ -14,7 +14,7 @@ FarmerFlow is an innovative mobile application designed to help farmers manage a
 
 ## 🛠 Tech Stack
 
-- **Expo Go** – Fast and easy React Native development.  
+- **Expo** – Fast and easy React Native development.  
 - **React Native (TypeScript)** – For a robust and scalable mobile experience.  
 - **Firebase** – Secure authentication, real-time database, and cloud functions.  
 
